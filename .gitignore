@@ -1,0 +1,10 @@
+Manifest.toml
+.DS_Store
+build.log
+.ipynb_checkpoints
+*.cov
+*.ipynb
+.vscode
+docs/build
+docs/src/examples/*.md
+index.md

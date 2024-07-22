@@ -1,0 +1,6 @@
+[rDCMdata]
+git-tree-sha1 = "641926a037e3d61c435833d7139cc1547197d303"
+
+    [[rDCMdata.download]]
+    sha256 = "3c8df6d4731a868964e1bc9628bbef6a7c2dc53c65d12d664be9f629ba4ce7e8"
+    url = "https://www.tapas.tnu-zurich.com/Julia/rDCM/data.tar.gz"
