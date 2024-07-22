@@ -31,13 +31,11 @@ function export_to_SPM(path::String, rdcm::RigidRdcm, output::RigidOutput)
     pc_A = 1 ./ l0[1:size(dcm.a, 1), 1:size(dcm.a, 2)]
     pc_C = 1 ./ l0[1:size(dcm.c, 1), (size(dcm.a, 2) + 1):end] # TODO check this
 
-    n_param = size(dcm.a, 1)*size(dcm.a, 2) + size(dcm.c, 1)*size(dcm.c, 2)
+    n_param = size(dcm.a, 1) * size(dcm.a, 2) + size(dcm.c, 1) * size(dcm.c, 2)
     spm_pC = spzeros(n_param, n_param)
     spm_pC[diagind(spm_pC)] .= [pc_A[:]; pc_C[:]]
     # model settings
-    spm_M = Dict(
-        "IS" => output.inversion, "pE" => spm_pE, "pC" => spm_pC
-    )
+    spm_M = Dict("IS" => output.inversion, "pE" => spm_pE, "pC" => spm_pC)
 
     # error covariance
     Ce = 1 ./ (output.a_all ./ output.b_all)

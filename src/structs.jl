@@ -837,10 +837,10 @@ function Base.setproperty!(val::BoldY, key::Symbol, x)
         if isnothing(x) && !isnothing(val.name)
             setfield!(val, :name, nothing)
         end
-        if !isnothing(x) && isnothing(val.name)
-            nr = size(x,2)
-            setfield!(val,:name,["y_"*string(i) for i=1:nr])
-        end
+        #if !isnothing(x) && isnothing(val.name)
+        #    nr = size(x,2)
+        #    setfield!(val,:name,["y_"*string(i) for i=1:nr])
+        #end
         if !isnothing(x) && !isnothing(val.name)
             if size(x, 2) ≠ length(Vector{String}(val.name))
                 error("Size of y and name vector don't match.")
@@ -1132,7 +1132,9 @@ function BiLinearDCM(dcm::LinearDCM)
     nu = size(dcm.c, 2)
     nr = size(dcm.a, 1)
     B = zeros(nr, nr, nu)
-
+    if !isnothing(dcm.Y)
+        dcm.Y.y = nothing
+    end
     return BiLinearDCM(
         dcm.a,
         B .≠ 0.0,
@@ -1224,7 +1226,9 @@ function NonLinearDCM(dcm::LinearDCM)
     nr = size(dcm.a, 1)
     b = BitArray(zeros(nr, nr, nu))
     d = BitArray(zeros(nr, nr, nr))
-
+    if !isnothing(dcm.Y)
+        dcm.Y.y = nothing
+    end
     return NonLinearDCM(
         dcm.a,
         b,
@@ -1242,7 +1246,9 @@ end
 function NonLinearDCM(dcm::BiLinearDCM)
     nr = size(dcm.a, 1)
     d = BitArray(zeros(nr, nr, nr))
-
+    if !isnothing(dcm.Y)
+        dcm.Y.y = nothing
+    end
     return NonLinearDCM(
         dcm.a,
         dcm.b,

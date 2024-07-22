@@ -71,5 +71,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl.git", devbranch="main"
+    repo="github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl.git",
+    devbranch="main",
 )
