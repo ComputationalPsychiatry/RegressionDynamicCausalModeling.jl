@@ -79,7 +79,7 @@ function test_TrueParamLinear()
     a[1,2] = false
     c = BitArray(zeros(2,3))
     Tp = rDCM.TrueParamLinear(a,c;rng=MersenneTwister(rDCM.FIXEDSEED))
-    A_ref = [-0.6390067190365966 0.0; -0.888766714219392 -0.49321116549770155]
+    A_ref = [-0.5347516797591492 0.0; -1.777533428438784 -0.4983027913744254]
     @test all(Tp.A .== A_ref)
 end
 

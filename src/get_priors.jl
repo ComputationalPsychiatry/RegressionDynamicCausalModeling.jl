@@ -17,7 +17,7 @@ function get_prior_stats(a::BitMatrix, c::BitMatrix)
     pE_epsilon = 0.0
 
     # prior covariance
-    pC_A = (a_new .* fac) ./ (8nr) + I ./ (8nr)
+    pC_A = (a_new .* fac) ./ nr + I ./ (8nr)
     pC_C = zeros(Float64, size(c))
     pC_C[c] .= 1.0
 
@@ -116,9 +116,7 @@ function sample_from_prior(
     # prepare mean and variance for connectivity parameters
     mu0 = [prior.pE.A[a]; prior.pE.C[c]]
     sigma0 = [prior.pC.A[a]; prior.pC.C[c]]
-    #sigma0 = diagm([prior.pC.A[a]; prior.pC.C[c]])
-
-    #rng = MersenneTwister(seed)
+    # sigma0 = diagm([prior.pC.A[a]; prior.pC.C[c]])
 
     A_endIdx = sum(a)
 
@@ -126,7 +124,7 @@ function sample_from_prior(
         # mu = rand(rng, MvNormal(mu0, sigma0))
         mu = similar(mu0)
         for i in eachindex(mu)
-            mu[i] = rand(rng, Normal(mu0[i],sigma0[i]))
+            mu[i] = rand(rng, Normal(mu0[i], sigma0[i]))
         end
 
         A = zeros(size(a))
