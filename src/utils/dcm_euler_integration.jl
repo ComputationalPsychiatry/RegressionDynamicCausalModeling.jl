@@ -15,11 +15,9 @@ convolution with HRF)
 - `x`: neuronal signal
 """
 function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
-    if !isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
-        @warn "Binary file for Euler integration is missing. Cannot generate synthetic data.
-        Please check if gcc is installed and recompile the c code."
-        return zeros(dcm.scans, dcm.nr), zeros(dcm.scans, dcm.nr)
-    end
+    # if !isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
+    #     @info "Binary file for Euler integration not found. Using Julia to generate data."
+    # end
     # number of regions
     nr = size(dcm.Ep.A, 1)
     nu = size(dcm.c, 2)
@@ -64,17 +62,43 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
     # parameter list
     # the last two parameters are for B and D matrix respectively
     # if set to 1 we assume we have bi-linear/non-linear DCM
+    dcmTypeB = false
+    dcmTypeD = false
     if dcm isa LinearDCM
         paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 0 0])
     elseif dcm isa BiLinearDCM
         paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 0])
+        dcmTypeB = true
     elseif dcm isa NonLinearDCM
         paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 1])
+        dcmTypeB = true
+        dcmTypeD = true
     end
     # neuronal signal and time courses for hemodynamic parameters
-    x, _, _, v, q = dcm_euler_integration(
-        A, C, U, B, D, oxygenExtractionFraction, α_inv, τ, γ, κ, paramList
-    )
+    if isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
+        x, _, _, v, q = dcm_euler_integration_c(
+            A, C, U, B, D, oxygenExtractionFraction, α_inv, τ, γ, κ, paramList
+        )
+    else
+        x, _, _, v, q = dcm_euler_integration_jl(
+            A,
+            C,
+            U,
+            B,
+            D,
+            oxygenExtractionFraction,
+            α_inv,
+            τ,
+            γ,
+            κ,
+            dcm.U.dt,
+            size(U, 1),
+            nr,
+            size(U, 2),
+            dcmTypeB,
+            dcmTypeD,
+        )
+    end
 
     # constants for BOLD signal equation
     relaxationRateSlope = 25.0
@@ -106,7 +130,7 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
 end
 
 """
-    dcm_euler_integration(A,C,U,B,D,rho,alphaInv,tau,gamma,kappa,param)
+    dcm_euler_integration_c(A,C,U,B,D,rho,alphaInv,tau,gamma,kappa,param)
 
 Wrapper that calls the C code performing the Euler integration.
 
@@ -135,7 +159,7 @@ Wrapper that calls the C code performing the Euler integration.
 - `v::Matrix{Float64}`: blood volume
 - `q::Matrix{Float64}`: deoxyhemoglobin content
 """
-function dcm_euler_integration(
+function dcm_euler_integration_c(
     A::Matrix{Float64},
     C::Matrix{Float64},
     U::Matrix{Float64},
@@ -199,4 +223,128 @@ function euler_make_indices(dcm::T) where {T<:DCM}
 
     # asign those timings
     return Indices[idx]
+end
+
+"""
+    dcm_euler_integration_jl(A,C,U,B,D,rho,alphaInv,tau,gamma,kappa,param)
+
+Perform Euler integration of DCM.
+
+# Arguments
+- `A::Matrix{Float64}`: Endogenous connectivity
+- `C::Matrix{Float64}`: Input, represents u*C'
+- `U::Matrix{Float64}`: Input matrix
+- `B::Array{Float64,3}`: Bi linear connectivity matrix
+- `D::Array{Float64,3}`: Non linear connectivity matrix
+- `rho::Vector{Float64}`: hemodynamic parameter (one for each region)
+- `alphaInv::Float64`: hemodynamic parameter
+- `tau::Vector{Float64}`: hemodynamic parameter (one for each region)
+- `gamma::Float64`: hemodynamic parameter
+- `kappa::Vector{Float64}`: hemodynamic parameter (one for each region)
+- `timeStep::Float64`: Euler step size
+- `nTime::Int64`: total steps
+- `nStates::Int64`: number of regions
+- `nInputs::Int64`: number of inputs
+- `dcmTypeB::Bool`: is it a Bilinear DCM
+- `dcmTypeD::Bool`: is it a non-linear DCM
+
+# Output
+- `x::Matrix{Float64}`: neuronal activity
+- `s::Matrix{Float64}`: vasodilatory signal
+- `f::Matrix{Float64}`: blood flow
+- `v::Matrix{Float64}`: blood volume
+- `q::Matrix{Float64}`: deoxyhemoglobin content
+"""
+function dcm_euler_integration_jl(
+    A::Matrix{Float64},
+    C::Matrix{Float64},
+    U::Matrix{Float64},
+    B::Array{Float64,3},
+    D::Array{Float64,3},
+    rho::Vector{Float64},
+    alphaInv::Float64,
+    tau::Vector{Float64},
+    gamma::Float64,
+    kappa::Vector{Float64},
+    timeStep::Float64,
+    nTime::Int64,
+    nStates::Int64,
+    nInputs::Int64,
+    dcmTypeB::Bool,
+    dcmTypeD::Bool,
+)
+
+    # Initialize the dynamical system to resting state values
+    x_out = zeros(nTime, nStates)
+    s_out = zeros(nTime, nStates)
+    f1_out = ones(nTime, nStates)
+    v1_out = ones(nTime, nStates)
+    q1_out = ones(nTime, nStates)
+    old_f1 = zeros(nStates)
+    old_v1 = zeros(nStates)
+    old_q1 = zeros(nStates)
+
+    # Euler's integration steps
+    for iStep in 1:(nTime - 1)
+        # for each region
+        for jState in 1:nStates
+            # update x (neuronal signal)
+            x_out[iStep + 1, jState] =
+                x_out[iStep, jState] +
+                timeStep * (A[:, jState]' * x_out[iStep, :] + C[iStep, jState])
+
+            if dcmTypeB
+                # B matrix update
+                for kIter in 1:nInputs
+                    x_out[iStep + 1, jState] +=
+                        timeStep *
+                        (U[iStep, kIter] * x_out[iStep, :]' * B[:, jState, kIter])
+                end
+            end
+
+            if dcmTypeD
+                # D matrix update
+                for kIter in 1:nStates
+                    x_out[iStep + 1, jState] +=
+                        timeStep *
+                        (x_out[iStep, kIter] * (x_out[iStep, :]' * D[:, jState, kIter]))
+                end
+            end
+
+            # update s (vasodilatory signal)
+            s_out[iStep + 1, jState] =
+                s_out[iStep, jState] +
+                timeStep * (
+                    x_out[iStep, jState] - kappa[jState] * s_out[iStep, jState] -
+                    gamma * (f1_out[iStep, jState] - 1.0)
+                )
+
+            # update f (blood flow)
+            old_f1[jState] += timeStep * (s_out[iStep, jState] / f1_out[iStep, jState])
+
+            # update v (blood volume)
+            tmp1 = v1_out[iStep, jState]^alphaInv
+            tmp2 = (1.0 - (1.0 - rho[jState])^(1.0 / f1_out[iStep, jState])) / rho[jState]
+
+            old_v1[jState] +=
+                timeStep *
+                ((f1_out[iStep, jState] - tmp1) / (tau[jState] * v1_out[iStep, jState]))
+
+            # update q (deoxyhemoglobin content)
+            old_q1[jState] +=
+                timeStep * (
+                    (
+                        f1_out[iStep, jState] * tmp2 -
+                        tmp1 * q1_out[iStep, jState] / v1_out[iStep, jState]
+                    ) / (tau[jState] * q1_out[iStep, jState])
+                )
+
+            # tracking the exponential values
+            f1_out[iStep + 1, jState] = exp(old_f1[jState])
+            v1_out[iStep + 1, jState] = exp(old_v1[jState])
+            q1_out[iStep + 1, jState] = exp(old_q1[jState])
+        end
+    end
+
+    return x_out, s_out, f1_out, v1_out, q1_out
 end
