@@ -7,7 +7,7 @@
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![JET](https://img.shields.io/badge/%E2%9C%88%EF%B8%8F%20tested%20with%20-%20JET.jl%20-%20red)](https://github.com/aviatesk/JET.jl)
 
-This Julia package implements a variant of dynamic causal modeling (DCM) for fMRI that enables computationally efficient inference on effective (i.e., directed) connectivity parameters among brain regions. Due to its computational efficiency, inversion of large (whole-brain) networks becomes feasible.<br>
+This Julia package implements a variant of dynamic causal modeling (DCM) for fMRI that enables computationally efficient inference on effective (i.e., directed) connectivity parameters among brain regions. Due to its computational efficiency, inversion of large (whole-brain) networks becomes feasible. \
 This package is part of [TAPAS](https://translationalneuromodeling.github.io/tapas/) which is a collection of software tools developed by the [Translational Neuromodeling Unit](https://www.tnu.ethz.ch/en/home) (TNU) and collaborators. The goal of these tools is to support clinical neuromodeling, particularly computational psychiatry, computational neurology, and computational psychosomatics.
 
 ## Getting started
@@ -46,9 +46,9 @@ y_pred = predict(rdcm,output)
 ```
 
 ## Some background
-The regression dynamic causal modeling (rDCM) package implements a variant of DCM for fMRI ([Friston et al., 2003](https://pubmed.ncbi.nlm.nih.gov/12948688/)) that enables computationally efficient inference on effective (i.e., directed) connectivity among brain regions. This allows rDCM to scale to larger networks and enables whole-brain effective connectivity analyses.<br>
-rDCM was first introduced in [Frässle et al. (2017)](https://pubmed.ncbi.nlm.nih.gov/28259780/) and then further extended by incorporating sparsity constraints in [Frässle et al. (2018)](https://www.sciencedirect.com/science/article/pii/S1053811918304762). An extension to resting-state fMRI data has been introduced in [Frässle et al. (2021)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8046067/).<br><br>
-**Important note**<br>
+The regression dynamic causal modeling (rDCM) package implements a variant of DCM for fMRI ([Friston et al., 2003](https://pubmed.ncbi.nlm.nih.gov/12948688/)) that enables computationally efficient inference on effective (i.e., directed) connectivity among brain regions. This allows rDCM to scale to larger networks and enables whole-brain effective connectivity analyses. \
+rDCM was first introduced in [Frässle et al. (2017)](https://pubmed.ncbi.nlm.nih.gov/28259780/) and then further extended by incorporating sparsity constraints in [Frässle et al. (2018)](https://www.sciencedirect.com/science/article/pii/S1053811918304762). An extension to resting-state fMRI data has been introduced in [Frässle et al. (2021)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8046067/). \
+**Important note** \
 The rDCM framework is in an early stage of development and the method is still subject to limitations. Due to these limitations, the requirements of rDCM in terms of fMRI data quality (i.e., fast repetition time (TR), high signal-to-noise ratio (SNR)) are high - as shown in simulation studies (Frässle et al., 2017; 2018). For data that does not meet these conditions, the method might not give reliable results. It remains the responsibility of the user to ensure that his/her dataset fulfills the requirements.
 
 ## Acknowledgements
