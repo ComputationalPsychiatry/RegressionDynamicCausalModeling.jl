@@ -17,9 +17,6 @@ This package can be installed using Julia's package manager:
 pkg> add RegressionDynamicCausalModeling
 ```
 
-### Requirements
-The package is able to simulate synthetic BOLD signal time-series. The integration of the neuronal equation is implemented in C. Therefore a [GCC compiler](https://gcc.gnu.org/) is needed if this functionality will be used. All other functionalities of the package also work without the compiler.
-
 ### Minimal example
 The following example shows how to simulate synthetic data with an example DCM and then estimate the posterior of the parameters with rDCM. Based on the estimated parameters one can predict the BOLD signal.
 
