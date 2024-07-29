@@ -1,6 +1,7 @@
 using Aqua: Aqua
 using JET
 using JuliaFormatter: JuliaFormatter
+using MAT: matopen
 using Test
 using RegressionDynamicCausalModeling
 # using Scratch

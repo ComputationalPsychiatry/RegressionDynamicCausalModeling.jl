@@ -347,6 +347,53 @@ p0:0.5
     @test s == ref_sparserdcm
 end
 
+function test_spm_compat(dcm)
+
+    # create rDCM struct
+    rdcm = RigidRdcm(dcm)
+
+    # set options for inversion
+    opt = Options(RigidInversionParams();synthetic=true,verbose=0,testing=true)
+
+    output = invert(rdcm,opt)
+    dcm_path = joinpath(rDCM.tmpdir,"dcm_SPM_compat.mat")
+    export_to_SPM(dcm_path,rdcm,output)
+
+    dcm2 = load_DCM(dcm_path;verbose=false)
+
+    A_ref = [-0.41548922171677133 0.3949738877798173 0.0;
+        0.0 -0.5238266884300515 -0.2711682814395596;
+        0.0 0.0 -0.46454372168894786]
+
+    @test all(A_ref .== dcm2.Ep.A[1:3,1:3])
+
+    # test also other fields
+    file = matopen(dcm_path)
+    DCM_mat = read(file, collect(keys(file))[1])
+    close(file)
+
+    # check top level fields
+    @test haskey(DCM_mat, "options")
+    @test haskey(DCM_mat, "M")
+    @test haskey(DCM_mat, "F")
+    @test haskey(DCM_mat, "b")
+    @test haskey(DCM_mat, "d")
+    @test haskey(DCM_mat, "v")
+    @test haskey(DCM_mat, "n")
+    @test haskey(DCM_mat, "Ce")
+
+    # check lower level fields
+    @test haskey(DCM_mat["options"], "nonlinear")
+    @test haskey(DCM_mat["options"], "two_state")
+    @test haskey(DCM_mat["options"], "stochastic")
+    @test haskey(DCM_mat["options"], "centre")
+    @test haskey(DCM_mat["options"], "induced")
+
+    @test haskey(DCM_mat["M"], "IS")
+    @test haskey(DCM_mat["M"], "pE")
+    @test haskey(DCM_mat["M"], "pC")
+end
+
 function testUtils()
     @testset verbose=true "Utils" begin
 
@@ -360,6 +407,10 @@ function testUtils()
             test_print_nonlinearDCM(NonLinearDCM(copy(dcm)))
             test_print_RigidRdcm(RigidRdcm(copy(dcm)))
             test_print_SparseRdcm(SparseRdcm(copy(dcm)))
+        end
+
+        @testset "SPM compatibility" begin
+            test_spm_compat(copy(dcm))
         end
     end
 end
