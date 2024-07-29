@@ -57,6 +57,9 @@ fmt = Documenter.HTML(;
     repolink="https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl",
     canonical="https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl",
     assets=String[],
+    collapselevel=1,
+    description="A Julia package for estimating effective (i.e., directed) connectivity in large (whole-brain) networks",
+    size_threshold_ignore=[joinpath("examples", "Invert_rDCM.md")],
 )
 
 makedocs(;
