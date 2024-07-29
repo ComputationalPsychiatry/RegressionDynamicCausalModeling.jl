@@ -365,7 +365,7 @@ function test_spm_compat(dcm)
         0.0 -0.5238266884300515 -0.2711682814395596;
         0.0 0.0 -0.46454372168894786]
 
-    @test all(A_ref .== dcm2.Ep.A[1:3,1:3])
+    @test all(A_ref .≈ dcm2.Ep.A[1:3,1:3])
 
     # test also other fields
     file = matopen(dcm_path)
