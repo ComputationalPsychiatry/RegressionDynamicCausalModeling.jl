@@ -213,6 +213,65 @@ function test_generate_nonlinear()
     end
 end
 
+function test_generate_pureJulia()
+
+    y_ref = [0.0330336291743252,
+    0.0665343424300450,
+    -0.0456961116174254,
+    -0.0272865307283921,
+    0.0481491930882374,
+    0.00164387155647311,
+    -0.144927339313638,
+    -0.464993490279593,
+    -0.574813789380730,
+    -0.341123821613434,
+    -0.206535004740480,
+    -0.291082929712693,
+    -0.381652114399425,
+    -0.267514459311530,
+    0.0700034424041667,
+    0.178888565176907,
+    -0.0175121522928192,
+    -0.0628681644556771,
+    0.0488851979895122,
+    0.0192157183464367]
+
+    x_ref = [-0.0149604089047334,
+    -0.0139847279152765,
+    -0.0128437849121769,
+    -0.0115556998472636,
+    -0.0101402510696320,
+    -0.00861855109053162,
+    -0.00701270987706510,
+    -0.00534549254639817,
+    -0.00363997810210866,
+    -0.00191922543555109,
+    -0.000205952239704804,
+    0.00147776821260329,
+    0.00311078825149422,
+    0.00467314160008239,
+    0.00614627124653424,
+    0.00751322767712344,
+    0.00875883650215976,
+    0.00986983518689852,
+    0.0108349791917235,
+    0.0116451183205517]
+
+    # rename binary file such that package is forced to use Julia implementation
+    orig_name = joinpath(rDCM.euler_integration_bin, "libdcm_euler_integration.so")
+    alt_name = joinpath(rDCM.euler_integration_bin, "hidden.so")
+    mv(orig_name,alt_name)
+
+    dcm_non = rDCM.load_DCM_nonlinear()
+    _, y, x, _ = generate_BOLD(dcm_non;SNR=3)
+
+    #rename file to original name
+    mv(alt_name,orig_name)
+    @test all(y_ref .≈ y[1:20,1])
+    @test all(x_ref .≈ x[1:20,1])
+
+end
+
 function test_error_handling(dcm)
 
     # specified TR is not a multiple of u_dt
@@ -238,6 +297,7 @@ function test_simulate_data()
         test_error_handling(dcm)
         test_generate_bilinear()
         test_generate_nonlinear()
+        test_generate_pureJulia()
     end
 end
 
