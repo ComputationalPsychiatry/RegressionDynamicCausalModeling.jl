@@ -37,7 +37,10 @@ function test_load_DCM(dcm)
         0	0	0	0	0;
         0	0	0	0	1])
 
-        @test dcm isa LinearDCM
+        save_DCM(joinpath(rDCM.tmpdir,"dcm_lin.jls"),dcm)
+        save_DCM(joinpath(rDCM.tmpdir,"dcm_lin.mat"),dcm)
+        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_lin.jls")) isa LinearDCM
+        @test (@test_logs (:info,"Found linear DCM.") load_DCM(joinpath(rDCM.tmpdir,"dcm_lin.mat"))) isa LinearDCM
 
         @test all(a .== dcm.a[1:5,1:5])
         @test all(c .== dcm.c[1:5,1:5])
@@ -62,15 +65,15 @@ function test_load_DCM(dcm)
         dcm_bi.b[1,1,1] = true
         save_DCM(joinpath(rDCM.tmpdir,"dcm_bi.jls"),dcm_bi)
         save_DCM(joinpath(rDCM.tmpdir,"dcm_bi.mat"),dcm_bi)
-        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_bi.jls");verbose=false) isa BiLinearDCM
-        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_bi.mat");verbose=false) isa BiLinearDCM
+        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_bi.jls")) isa BiLinearDCM
+        @test (@test_logs (:info,"Found bi-linear DCM.") load_DCM(joinpath(rDCM.tmpdir,"dcm_bi.mat"))) isa BiLinearDCM
 
         dcm_non = NonLinearDCM(copy(dcm))
         dcm_non.d[1,1,1] = true
         save_DCM(joinpath(rDCM.tmpdir,"dcm_non.jls"),dcm_non)
         save_DCM(joinpath(rDCM.tmpdir,"dcm_non.mat"),dcm_non)
-        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_non.jls");verbose=false) isa NonLinearDCM
-        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_non.mat");verbose=false) isa NonLinearDCM
+        @test load_DCM(joinpath(rDCM.tmpdir,"dcm_non.jls")) isa NonLinearDCM
+        @test (@test_logs (:info,"Found non-linear DCM.") load_DCM(joinpath(rDCM.tmpdir,"dcm_non.mat"))) isa NonLinearDCM
     end
 end
 
