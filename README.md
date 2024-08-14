@@ -6,6 +6,7 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![JET](https://img.shields.io/badge/%E2%9C%88%EF%B8%8F%20tested%20with%20-%20JET.jl%20-%20red)](https://github.com/aviatesk/JET.jl)
+[![RegressionDynamicCausalModeling Downloads](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fjuliapkgstats.com%2Fapi%2Fv1%2Fmonthly_downloads%2FRegressionDynamicCausalModeling&query=total_requests&suffix=%2Fmonth&label=Downloads)](http://juliapkgstats.com/pkg/RegressionDynamicCausalModeling)
 
 This Julia package implements a variant of dynamic causal modeling (DCM) for fMRI that enables computationally efficient inference on effective (i.e., directed) connectivity parameters among brain regions. Due to its computational efficiency, inversion of large (whole-brain) networks becomes feasible. \
 This package is part of [TAPAS](https://translationalneuromodeling.github.io/tapas/) which is a collection of software tools developed by the [Translational Neuromodeling Unit](https://www.tnu.ethz.ch/en/home) (TNU) and collaborators. The goal of these tools is to support clinical neuromodeling, particularly computational psychiatry, computational neurology, and computational psychosomatics.
@@ -41,6 +42,8 @@ output = invert(rdcm, opt)
 # Simulate BOLD signal based on estimated parameters
 y_pred = predict(rdcm,output)
 ```
+
+Detailed documentation can be found [here](https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/dev/).
 
 ## Some background
 The regression dynamic causal modeling (rDCM) package implements a variant of DCM for fMRI ([Friston et al., 2003](https://pubmed.ncbi.nlm.nih.gov/12948688/)) that enables computationally efficient inference on effective (i.e., directed) connectivity among brain regions. This allows rDCM to scale to larger networks and enables whole-brain effective connectivity analyses. \

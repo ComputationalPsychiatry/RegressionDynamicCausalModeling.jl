@@ -107,6 +107,11 @@ function test_generate_linear(dcm)
         @test all(y_ref .≈ y[1:20,1])
         @test all(x_ref .≈ x[1:20,1])
     end
+    @testset "special cases" begin
+        @test_logs (:warn,"Overwriting sampling time of Y with TR.") generate_BOLD(dcm;SNR=3,TR=1.0)
+        dcm.Y = nothing
+        generate_BOLD(dcm;SNR=3, TR=1.0) #TODO: make test for results
+    end
 end
 
 function test_generate_bilinear()
@@ -293,8 +298,8 @@ function test_simulate_data()
 
     test_HRF()
     @testset verbose=true "Generate synthetic data" begin
-        test_generate_linear(dcm)
-        test_error_handling(dcm)
+        test_generate_linear(copy(dcm))
+        test_error_handling(copy(dcm))
         test_generate_bilinear()
         test_generate_nonlinear()
         test_generate_pureJulia()
