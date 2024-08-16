@@ -130,10 +130,15 @@ function test_LinearDCM()
     @test_throws ErrorException dcm.c = BitMatrix(zeros(3,3))
     @test_throws ErrorException dcm.scans = 120
     @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(3,3)),BitArray(ones(3,4)))
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(2,2)),BitArray(ones(2,4)))
+
+    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException LinearDCM(a,c,scans,nr,U_long,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -168,10 +173,15 @@ function test_BiLinearDCM()
     @test_throws ErrorException dcm.c = BitMatrix(zeros(3,3))
     @test_throws ErrorException dcm.scans = 120
     @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)))
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)))
+
+    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException BiLinearDCM(a,b,c,scans,nr,U_long,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -211,10 +221,15 @@ function test_NonLinearDCM()
     @test_throws ErrorException dcm.d = BitArray(zeros(2,2,3))
     @test_throws ErrorException dcm.scans = 120
     @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)),BitArray(zeros(3,3,3)))
     @test_throws ErrorException dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)),BitArray(zeros(2,2,2)))
+
+    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException NonLinearDCM(a,b,c,d,scans,nr,U_long,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
