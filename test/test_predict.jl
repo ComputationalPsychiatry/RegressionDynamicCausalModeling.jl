@@ -121,11 +121,30 @@ function predict_sparse_rdcm(dcm)
     end
 end
 
+function predict_error_handling(dcm)
+
+    @testset "error handling" begin
+
+        # set options for inversion
+        opt = Options(RigidInversionParams();synthetic=true,
+        verbose=0,
+        testing=true)
+        rdcm = RigidRdcm(dcm)
+
+        output = invert(rdcm, opt)
+        rdcm.c = BitMatrix(zeros(size(rdcm.c)))
+
+        @test_throws ErrorException predict(rdcm,output)
+
+    end
+end
+
 function test_prediction()
     dcm = load_example_DCM()
     @testset verbose=true "Prediction" begin
         predict_rigid_rdcm(copy(dcm))
         predict_sparse_rdcm(copy(dcm))
+        predict_error_handling(copy(dcm))
     end
 end
 

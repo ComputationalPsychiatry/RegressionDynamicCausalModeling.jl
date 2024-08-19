@@ -12,7 +12,10 @@ Predict BOLD signal based on parameter estimates after model inversion.
 """
 function predict(rdcm::T1, output::T2) where {T1<:RDCM,T2<:ModelOutput}
     out_dcm = LinearDCM(rdcm, output)
-    # SNR value has no meaning because we save only noise free prediction
+    if sum(out_dcm.c) == 0 || isnothing(out_dcm.U) || size(out_dcm.U.u, 1) == 0
+        error("Cannot generate data from resting-state DCM.")
+    end
+    # SNR value has no meaning because we only save noise free prediction
     _, y_pred, _, _ = generate_BOLD(out_dcm; SNR=1)
     return y_pred
 end
