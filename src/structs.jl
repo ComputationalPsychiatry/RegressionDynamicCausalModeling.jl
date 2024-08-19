@@ -59,7 +59,7 @@ struct SparseInversionParams <: AbstractInvParam
     tol::Float64
     "Number of reruns"
     reruns::Int64
-    "Whether or not to estimate sparsity for C matrix. If true, the Bernoulli posteriors for the C matrix are not estimated."
+    "Whether or not to estimate sparsity for C matrix. If true, the Bernoulli posteriors for the C matrix are not pruned."
     restrictInputs::Bool
 
     # inner constructor with sanity checks
