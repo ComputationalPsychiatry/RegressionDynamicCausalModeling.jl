@@ -1168,20 +1168,22 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
         end
         setfield!(val, :scans, x)
     elseif key == :U
-        if size(x.u, 2) ≠ size(val.c, 2)
-            error("Number of inputs does not match.")
-        end
-        r_dt = 1
-        try
-            r_dt = Int(val.Y.dt / x.dt)
-        catch
-            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.")
-        end
-        y = val.Y.y
-        if !isnothing(y)
-            if size(y, 1) ≠ size(x.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
+        if !isnothing(x)
+            if size(x.u, 2) ≠ size(val.c, 2)
+                error("Number of inputs does not match.")
+            end
+            r_dt = 1
+            try
+                r_dt = Int(val.Y.dt / x.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            y = val.Y.y
+            if !isnothing(y)
+                if size(y, 1) ≠ size(x.u, 1) / r_dt
+                    error("Length of BOLD signal and driving input u is inconsisten.")
+                end
             end
         end
         setfield!(val, :U, x)
