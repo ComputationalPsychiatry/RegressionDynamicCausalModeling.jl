@@ -83,6 +83,7 @@ function test_TrueParamLinear()
     @test all(Tp.A .== A_ref)
 
     @test_throws ErrorException rDCM.TrueParamLinear(A,ones(49,3))
+    @test_throws ErrorException rDCM.TrueParamLinear(A,ones(49,3),zeros(50),zeros(50),0.0)
     @test_throws ErrorException rDCM.TrueParamLinear(A,C,zeros(50),zeros(49),0.0)
 end
 
@@ -113,6 +114,7 @@ function test_TrueParamBilinear()
     @test Tp.C[1,1] == C_ref
 
     @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,ones(49,3))
+    @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,ones(49,3),zeros(50),zeros(50),0.0)
     @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,C,zeros(50),zeros(49),0.0)
 end
 
@@ -350,10 +352,10 @@ function test_ModelOutput()
     z_all = zeros(2,2) .+ 0.5
 
     # output of rigid rDCM
-    @test_throws ErrorException rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,  m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      a_all,b_all,  m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,zeros(Int64,2),a_all,b_all,  m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all,m_all,Σ,"test")
+    @test_throws ErrorException rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,"test")
+    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,"test")
+    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,"test")
+    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
 
     # output of sparse rDCM
     @test_throws ErrorException rDCM.SparseOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
@@ -361,6 +363,44 @@ function test_ModelOutput()
     @test_throws ErrorException rDCM.SparseOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,z_all,          "test")
     @test_throws ErrorException rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,zeros(2,2) .- 1,"test")
     @test_throws ErrorException rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
+end
+
+function test_RigiRdcm()
+    a = BitArray(ones(2,2))
+    a[1,2] = false
+    c = BitArray(zeros(2,3))
+    c[1,1] = true
+    scans = 123
+    nr = 2
+    nu = size(c,2) - 1
+    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
+    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    Ep = rDCM.TrueParamLinear(a,c)
+    conf = rDCM.Confound(ones(3),["Constant"])
+    hrf = zeros(scans*16)
+
+    @test_throws ErrorException RigidRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf)
+    @test_throws ErrorException RigidRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf)
+end
+
+function test_SparseRdcm()
+    a = BitArray(ones(2,2))
+    a[1,2] = false
+    c = BitArray(zeros(2,3))
+    c[1,1] = true
+    scans = 123
+    nr = 2
+    nu = size(c,2) - 1
+    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
+    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    Ep = rDCM.TrueParamLinear(a,c)
+    conf = rDCM.Confound(ones(3),["Constant"])
+    hrf = zeros(scans*16)
+    p0 = 0.5
+
+    @test_throws ErrorException SparseRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException SparseRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException SparseRdcm(a,c,scans,nr,U,Y,Ep,conf,hrf,true,1.5)
 end
 
 function test_constructors()
@@ -380,6 +420,8 @@ function test_constructors()
         test_DCM()
         test_Confound()
         test_ModelOutput()
+        test_RigiRdcm()
+        test_SparseRdcm()
     end
 end
 
