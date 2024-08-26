@@ -1,5 +1,6 @@
 # Regression Dynamic Causal Modeling (rDCM)
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://computationalpsychiatry.github.io/RegressionDynamicCausalModeling.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/dev/)
 [![test](https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl/actions/workflows/test.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl/graph/badge.svg?token=6GHXMZTQEJ)](https://codecov.io/gh/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl)
@@ -43,7 +44,7 @@ output = invert(rdcm, opt)
 y_pred = predict(rdcm,output)
 ```
 
-Detailed documentation can be found [here](https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/dev/).
+Detailed documentation can be found [here](https://computationalpsychiatry.github.io/RegressionDynamicCausalModeling.jl/stable/).
 
 ## Some background
 The regression dynamic causal modeling (rDCM) package implements a variant of DCM for fMRI ([Friston et al., 2003](https://pubmed.ncbi.nlm.nih.gov/12948688/)) that enables computationally efficient inference on effective (i.e., directed) connectivity among brain regions. This allows rDCM to scale to larger networks and enables whole-brain effective connectivity analyses. \

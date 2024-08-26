@@ -29,8 +29,8 @@ function sparse_inversion(
     end
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
+    nc = size(dcm.Conf.X0, 2)
     if opt.synthetic
-        nc = size(dcm.Conf.X0, 2)
         dcm.c[:, (end - nc + 1):end] .= false
     end
 
@@ -90,14 +90,14 @@ function sparse_inversion(
 
         # ensure baseline regressor (will only contribute for empirical data)
         if opt.synthetic
-            p0[end] = 0.0
+            p0[end - (nc - 1)] = 0.0
         else
-            p0[end] = 1.0
+            p0[end - (nc - 1)] = 1.0
         end
 
         # make sure that driving inputs are only on correct connections
         if opt.invParams.restrictInputs
-            p0[(nr + 1):(end - 1)] = dcm.c[r, 1:(end - 1)] # todo: check if its nr:... or nr+1:...
+            p0[(nr + 1):(end - nc)] = dcm.c[r, 1:(end - nc)]
         end
 
         # allocate memory
@@ -203,7 +203,6 @@ function sparse_inversion(
         next!(prog)
     end
 
-    nc = size(dcm.Conf.X0, 2)
     m_all = m_all[:, 1:(end - nc)] # cut away regressor estimate
     z_all = z_all[:, 1:(end - nc)]
     for r in 1:nr

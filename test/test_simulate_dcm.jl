@@ -1,5 +1,5 @@
 
-function test_HRF()
+function test_HRF(dcm)
 
     @testset "Create HRF" begin
         N = 43424
@@ -54,6 +54,33 @@ function test_HRF()
         -5.10760494005637e-07]
 
         @test all(hrf_ref .≈ hrf[1:20])
+
+        dcm.U = nothing
+        hrf = rDCM.get_hrf(dcm)
+        hrf_ref = [0.0,
+            0.0,
+            0.0,
+            0.0,
+            -3.291034022872453e-7,
+            -1.1186551508966146e-6,
+            -2.323319830470751e-6,
+            -3.740689203218181e-6,
+            -5.029503350365019e-6,
+            -5.726565529015204e-6,
+            -5.26242693096037e-6,
+            -2.975913690464425e-6,
+            1.8724351421153048e-6,
+            1.0087953622795571e-5,
+            2.2530397133001847e-5,
+            4.0103394435775375e-5,
+            6.37447482576026e-5,
+            9.441753206153054e-5,
+            0.00013310193361654673,
+            0.00018078779859944974]
+        @test all(hrf_ref .≈ hrf[1:20])
+
+        dcm.Y.y = nothing
+        @test_throws ErrorException rDCM.get_hrf(dcm)
     end
 end
 
@@ -296,7 +323,7 @@ function test_simulate_data()
 
     dcm = load_example_DCM()
 
-    test_HRF()
+    test_HRF(copy(dcm))
     @testset verbose=true "Generate synthetic data" begin
         test_generate_linear(copy(dcm))
         test_error_handling(copy(dcm))

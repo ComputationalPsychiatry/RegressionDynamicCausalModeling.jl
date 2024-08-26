@@ -29,8 +29,8 @@ function rigid_inversion(
     #const_freq = X_c[1,1:nr]
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
+    nc = size(dcm.Conf.X0, 2)
     if opt.synthetic
-        nc = size(dcm.Conf.X0, 2)
         dcm.c[:, (end - nc + 1):end] .= false
     end
 
@@ -120,7 +120,6 @@ function rigid_inversion(
         next!(prog)
     end
 
-    nc = size(dcm.Conf.X0, 2)
     m_all = m_all[:, 1:(end - nc)] # cut away regressor estimate
     for r in 1:nr
         Σ_all[r] = Σ_all[r][1:(end - nc), 1:(end - nc)] # TODO: make a test for this

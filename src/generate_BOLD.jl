@@ -30,12 +30,7 @@ function generate_BOLD(
             error("Y field is empty. Please specify the TR of the BOLD signal manually
             using tapas_rdcm_generate(dcm;TR=value)")
         else
-            try
-                r_dt = Int64(dcm_c.Y.dt / dcm_c.U.dt)
-            catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
-            end
+            r_dt = Int64(dcm_c.Y.dt / dcm_c.U.dt)
         end
     else
         try
@@ -121,15 +116,18 @@ Generate a hemodynamic response function (HRF) given a DCM.
 function get_hrf(dcm::T) where {T<:DCM}
     N = 0
     u_dt = 0
-    y = dcm.Y.y # need to do this otherwise JET.jl gives a false positive (1/2 union split)
-    try
+    y = nothing
+    if !isnothing(dcm.Y)
+        y = dcm.Y.y # need to do this otherwise JET.jl gives a false positive (1/2 union split)
+    end
+    if !isnothing(dcm.U)
         N = size(dcm.U.u, 1)
         u_dt = dcm.U.dt
-    catch
+    else
         if !isnothing(y)
             N = size(y, 1) * 16 # assumes microtime resolution is 16
         else
-            @error "BOLD signal is empty."
+            error("BOLD signal is empty.")
         end
         u_dt = dcm.Y.dt / 16
     end

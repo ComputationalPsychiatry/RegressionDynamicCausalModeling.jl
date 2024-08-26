@@ -59,7 +59,7 @@ struct SparseInversionParams <: AbstractInvParam
     tol::Float64
     "Number of reruns"
     reruns::Int64
-    "Whether or not to estimate sparsity for C matrix. If true, the Bernoulli posteriors for the C matrix are not estimated."
+    "Whether or not to estimate sparsity for C matrix. If true, the Bernoulli posteriors for the C matrix are not pruned."
     restrictInputs::Bool
 
     # inner constructor with sanity checks
@@ -395,6 +395,23 @@ Base.@kwdef mutable struct LinearDCM <: DCM
         if scans ≤ 0
             error("Invalid number of scans.")
         end
+        if !isnothing(Y) && !isnothing(U)
+            y = Y.y # for JET not to throw error
+            if !isnothing(y)
+                r_dt = 1
+                try
+                    r_dt = Int(Y.dt / U.dt)
+                catch
+                    error(
+                        "The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                  of the input U (u_dt). Cannot proceed.",
+                    )
+                end
+                if size(y, 1) ≠ size(U.u, 1) / r_dt
+                    error("Length of BOLD signal and driving input u is inconsisten.")
+                end
+            end
+        end
 
         return new(a, c, scans, nr, U, Y, Ep, Conf)
     end
@@ -455,6 +472,18 @@ Base.@kwdef mutable struct BiLinearDCM <: DCM
         end
         if scans ≤ 0
             error("Invalid number of scans.")
+        end
+        if !isnothing(Y) && !isnothing(Y.y) && !isnothing(U)
+            r_dt = 1
+            try
+                r_dt = Int(Y.dt / U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(Y.y, 1) ≠ size(U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
         end
 
         return new(a, b, c, scans, nr, U, Y, Ep, Conf)
@@ -522,6 +551,18 @@ Base.@kwdef mutable struct NonLinearDCM <: DCM
         end
         if scans ≤ 0
             error("Invalid number of scans.")
+        end
+        if !isnothing(Y) && !isnothing(Y.y) && !isnothing(U)
+            r_dt = 1
+            try
+                r_dt = Int(Y.dt / U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(Y.y, 1) ≠ size(U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
         end
 
         return new(a, b, c, d, scans, nr, U, Y, Ep, Conf)
@@ -683,6 +724,19 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
         if size(U.u, 2) + size(Conf.X0, 2) ≠ size(c, 2)
             error("Dimension mismatch.")
         end
+        y = Y.y # for JET not to throw error
+        if !isnothing(y)
+            r_dt = 1
+            try
+                r_dt = Int(Y.dt / U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(y, 1) ≠ size(U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
+        end
 
         return new(a, c, scans, nr, U, Y, Ep, Conf, hrf)
     end
@@ -741,6 +795,20 @@ Base.@kwdef mutable struct SparseRdcm <: RDCM
 
         if p0 < 0.0 || p0 > 1.0
             error("p0 is not a proper Bernoulli parameter.")
+        end
+
+        y = Y.y # for JET not to throw error
+        if !isnothing(y)
+            r_dt = 1
+            try
+                r_dt = Int(Y.dt / U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(y, 1) ≠ size(U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
         end
         return new(a, c, scans, nr, U, Y, Ep, Conf, hrf, inform_p0, p0)
     end
@@ -1100,8 +1168,23 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
         end
         setfield!(val, :scans, x)
     elseif key == :U
-        if size(x.u, 2) ≠ size(val.c, 2)
-            error("Number of inputs does not match.")
+        if !isnothing(x)
+            if size(x.u, 2) ≠ size(val.c, 2)
+                error("Number of inputs does not match.")
+            end
+            r_dt = 1
+            try
+                r_dt = Int(val.Y.dt / x.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            y = val.Y.y
+            if !isnothing(y)
+                if size(y, 1) ≠ size(x.u, 1) / r_dt
+                    error("Length of BOLD signal and driving input u is inconsisten.")
+                end
+            end
         end
         setfield!(val, :U, x)
     elseif key == :Y
@@ -1111,6 +1194,16 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
             end
             if size(x.y, 1) ≠ val.scans
                 error("Number of scans does not match.")
+            end
+            r_dt = 1
+            try
+                r_dt = Int(x.dt / val.U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
@@ -1196,6 +1289,19 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
         if size(x.u, 2) ≠ size(val.c, 2)
             error("Number of inputs does not match.")
         end
+        r_dt = 1
+        try
+            r_dt = Int(val.Y.dt / x.dt)
+        catch
+            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+            of the input U (u_dt). Cannot proceed.")
+        end
+        y = val.Y.y
+        if !isnothing(y)
+            if size(y, 1) ≠ size(x.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
+        end
         setfield!(val, :U, x)
     elseif key == :Y
         if !isnothing(x) && !isnothing(x.y)
@@ -1204,6 +1310,16 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
             end
             if size(x.y, 1) ≠ val.scans
                 error("Number of scans does not match.")
+            end
+            r_dt = 1
+            try
+                r_dt = Int(x.dt / val.U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
@@ -1302,6 +1418,19 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
         if size(x.u, 2) ≠ size(val.c, 2)
             error("Number of inputs does not match.")
         end
+        r_dt = 1
+        try
+            r_dt = Int(val.Y.dt / x.dt)
+        catch
+            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+            of the input U (u_dt). Cannot proceed.")
+        end
+        y = val.Y.y
+        if !isnothing(y)
+            if size(y, 1) ≠ size(x.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
+        end
         setfield!(val, :U, x)
     elseif key == :Y
         if !isnothing(x) && !isnothing(x.y)
@@ -1310,6 +1439,16 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
             end
             if size(x.y, 1) ≠ val.scans
                 error("Number of scans does not match.")
+            end
+            r_dt = 1
+            try
+                r_dt = Int(x.dt / val.U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
