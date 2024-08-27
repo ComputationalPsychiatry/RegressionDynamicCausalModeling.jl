@@ -78,6 +78,7 @@ function test_load_DCM(dcm)
 end
 
 function test_print_linearDCM(dcm)
+    dcm_tmp = copy(dcm)
     ref_linear = "Linear DCM
 a:     50x50 matrix
 c:     50x25 matrix
@@ -130,9 +131,70 @@ Ep (True parameters)
     epsilon: -0.05
 "
 
+    # case where Y is nothing
     dcm.Y = nothing
     io = IOBuffer()
     show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", dcm)
+    s = String(take!(io))
+
+    @test s == ref_linear
+
+    # case where Y and U is nothing
+    dcm.U = nothing
+
+ref_linear = "Linear DCM
+a:     50x50 matrix
+c:     50x25 matrix
+scans: 2714
+nr:    50
+---------------------------------------------
+U (Input)
+   empty
+---------------------------------------------
+Y (BOLD signal)
+   empty
+---------------------------------------------
+Ep (True parameters)
+    A: 50 x 50 matrix
+    C: 50 x 25 matrix
+    transit: -0.06 ... -0.05
+    decay:   0.10 ... 0.10
+    epsilon: -0.05
+"
+
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", dcm)
+    s = String(take!(io))
+
+    @test s == ref_linear
+
+    # case where U is nothing
+    dcm_tmp.U = nothing
+
+ref_linear = "Linear DCM
+a:     50x50 matrix
+c:     50x25 matrix
+scans: 2714
+nr:    50
+---------------------------------------------
+U (Input)
+   empty
+---------------------------------------------
+Y (BOLD signal)
+   y:  2714x50 matrix
+   dt: 0.5s
+   names: y_1,...,y_50
+---------------------------------------------
+Ep (True parameters)
+    A: 50 x 50 matrix
+    C: 50 x 25 matrix
+    transit: -0.06 ... -0.05
+    decay:   0.10 ... 0.10
+    epsilon: -0.05
+"
+
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", dcm_tmp)
     s = String(take!(io))
 
     @test s == ref_linear
@@ -350,6 +412,58 @@ p0:0.5
     @test s == ref_sparserdcm
 end
 
+function test_print_RigidOutput(rdcm)
+
+    # set options for inversion
+    opt = Options(RigidInversionParams();synthetic=true,verbose=0,testing=true)
+
+    output = invert(rdcm,opt)
+
+ref_rigidOut = "rigid rDCM output
+    F:   75495.97
+    F_r: -838.83 ... 3644.24
+    iterations until convergence per region: 4 ... 4
+    Posteriors:
+        α: 1359.00,...,1359.00
+        β: 144.43,...,5.40
+        μ: 50 x 75 matrix
+        Σ: 50 element vector of matrices"
+
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", output)
+    s = String(take!(io))
+
+    @test s == ref_rigidOut
+end
+
+function test_print_SparseOutput(rdcm)
+    # set options for inversion
+    opt = Options(SparseInversionParams(;reruns=2,restrictInputs=true);
+    synthetic=true,
+    verbose=0,
+    testing=true)
+
+    out = invert(rdcm,opt)
+
+ref_sparseOutput = "sparse rDCM output
+    F:   42833.52
+    F_r: -445.39 ... 3644.24
+    iterations until convergence per region: 6 ... 5
+    Posteriors:
+        α: 1359.00,...,1359.00
+        β: 102.98,...,5.40
+        μ: 50 x 75 matrix
+        Σ: 50 element vector of matrices
+        Z: 50 x 75 matrix"
+
+
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", out)
+    s = String(take!(io))
+
+    @test s == ref_sparseOutput
+end
+
 function test_spm_compat(dcm)
 
     # create rDCM struct
@@ -410,6 +524,8 @@ function testUtils()
             test_print_nonlinearDCM(NonLinearDCM(copy(dcm)))
             test_print_RigidRdcm(RigidRdcm(copy(dcm)))
             test_print_SparseRdcm(SparseRdcm(copy(dcm)))
+            test_print_RigidOutput(RigidRdcm(copy(dcm)))
+            test_print_SparseOutput(SparseRdcm(copy(dcm);p0=0.15))
         end
 
         @testset "SPM compatibility" begin

@@ -181,14 +181,9 @@ function Base.show(io::IO, Y::BoldY)
 end
 
 function Base.show(io::IO, Conf::Confound)
-    try
-        print(io, "Confounds\n",
-                    "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n",
-                    "   names: ",Conf.name[1],",...,",Conf.name[end],"\n")
-    catch
-        print(io, "Confounds\n",
-                    "   empty\n")
-    end
+    print(io, "Confounds\n",
+                "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n",
+                "   names: ",Conf.name[1],",...,",Conf.name[end],"\n")
 end
 
 function Base.show(io::IO, rdcm::RigidRdcm)
