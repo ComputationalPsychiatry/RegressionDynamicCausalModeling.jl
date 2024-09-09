@@ -165,6 +165,10 @@ function sparse_inversion(
                     break
                 end
 
+                if i == maxIter # TODO: write test
+                    @warn "Reached maximum number of iterations for region $(r)."
+                end
+
                 # store old negative free energy
                 F_old = F_r
             end
