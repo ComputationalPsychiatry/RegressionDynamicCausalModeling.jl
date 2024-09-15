@@ -63,15 +63,12 @@ function create_regressors_core(
     # convolution of stimulus input and HRF
     uh = irfft(rfft(u, 1) .* repeat(h_fft, 1, nu), Nu, 1)
 
-    #--------------------------------------------------
-    # add confounds
-    #--------------------------------------------------
-    uh = [uh X0]
-
     # subsample input and HRF
     uh = uh[1:r_dt:end, :]
+    X0 = X0[1:r_dt:end, :]
     h_fft = rfft(hrf[1:r_dt:end, :], 1)
     uh_fft = rfft(uh, 1)
+    X0_fft = rfft(X0, 1)
 
     # coefficients to transform Fourier of the function to the fourier of the derivative
     Ny_reduced = size(y_fft, 1)
@@ -79,6 +76,11 @@ function create_regressors_core(
     coef = coef[1:Ny_reduced] # remove negative frequencies
 
     yd_fft = repeat(coef, 1, nr) .* y_fft ./ y_dt # multiply coefficients with data elementwise
+
+    num_conf = size(X0, 2)
+    X0d_fft = repeat(coef, 1, num_conf) .* X0_fft ./ y_dt
+
+    uh_fft = [uh_fft X0d_fft]
 
     # combine regressors
     X = [y_fft uh_fft ./ r_dt]
