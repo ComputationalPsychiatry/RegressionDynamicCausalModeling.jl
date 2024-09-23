@@ -30,15 +30,20 @@ function sparse_inversion(
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
     nc = size(dcm.Conf.X0, 2)
-    if opt.synthetic
-        dcm.c[:, (end - nc + 1):end] .= false
+    if nc == 1
+        conf_weight_idx = BitVector(ones(nr))
+    else
+        conf_weight_idx = BitMatrix(ones(nr, nc))
     end
+    #if opt.synthetic
+    #    dcm.c[:, (end - nc + 1):end] .= false
+    #end
 
     # get the priors
-    μ0, l0, a0, b0 = get_priors(dcm)
+    μ0, l0, a0, b0 = get_priors(dcm, conf_weight_idx)
 
     # dimensionality of θ
-    D = size(dcm.a, 2) + size(dcm.c, 2)
+    D = size(dcm.a, 2) + size(dcm.c, 2) + size(conf_weight_idx, 2)
 
     # allocate memory
     F_all = zeros(Float64, nr)
@@ -97,7 +102,7 @@ function sparse_inversion(
 
         # make sure that driving inputs are only on correct connections
         if opt.invParams.restrictInputs
-            p0[(nr + 1):(end - nc)] = dcm.c[r, 1:(end - nc)]
+            p0[(nr + 1):(end - nc)] = dcm.c[r, :]
         end
 
         # allocate memory

@@ -30,13 +30,18 @@ function rigid_inversion(
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
     nc = size(dcm.Conf.X0, 2)
-    if opt.synthetic
-        dcm.c[:, (end - nc + 1):end] .= false
+    if nc == 1
+        conf_weight_idx = BitVector(ones(nr))
+    else
+        conf_weight_idx = BitMatrix(ones(nr, nc))
     end
+    #if opt.synthetic
+    #    dcm.c[:, (end - nc + 1):end] .= false
+    #end
 
-    idx = [dcm.a dcm.c]
+    idx = [dcm.a dcm.c conf_weight_idx]
 
-    μ0, l0, a0, β0 = get_priors(dcm)
+    μ0, l0, a0, β0 = get_priors(dcm, conf_weight_idx)
 
     # allocate memory
     F_all = zeros(Float64, nr)
