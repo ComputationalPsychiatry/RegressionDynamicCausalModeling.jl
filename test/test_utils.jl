@@ -337,7 +337,7 @@ function test_print_RigidRdcm(rdcm)
 
 ref_rigidrdcm = "rigid rDCM
 a:     50x50 matrix
-c:     50x26 matrix
+c:     50x25 matrix
 scans: 2714
 nr:    50
 HRF:   43424 element vector
@@ -361,7 +361,7 @@ Ep (True parameters)
 ---------------------------------------------
 Confounds
    X0:    43424x1 matrix
-   names: Constant,...,Constant
+   names: Constant
 "
 
     io = IOBuffer()
@@ -375,7 +375,7 @@ function test_print_SparseRdcm(rdcm)
 
 ref_sparserdcm = "sparse rDCM
 a:     50x50 matrix
-c:     50x26 matrix
+c:     50x25 matrix
 scans: 2714
 nr:    50
 HRF:   43424 element vector
@@ -399,7 +399,7 @@ Ep (True parameters)
 ---------------------------------------------
 Confounds
    X0:    43424x1 matrix
-   names: Constant,...,Constant
+   names: Constant
 ---------------------------------------------
 inform_p0:false
 p0:0.5
