@@ -167,13 +167,26 @@ function test_LinearDCM()
 
     @test_throws ErrorException("Inconsistent number of regions.") LinearDCM(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,nothing)
     @test_throws ErrorException("Invalid number of scans.") LinearDCM(a,c,0,nr,U,Y,Ep,nothing)
-    conf = rDCM.Confound(ones(scans*16+1),["Constant"])
+    conf = Confound(ones(scans*16+1),["Constant"])
     @test_throws ErrorException("Confound matrix size and input matrix size don't match.") LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
 
     Y_long = BoldY(zeros(scans+1,nr),0.5)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") LinearDCM(a,c,scans,nr,U,Y_long,Ep,nothing)
 
-    #TODO: test for sanity check for r_dt missing
+    F_r = zeros(50)
+    iter_all = ones(50)
+    a_all = ones(50)
+    b_all = ones(50)
+    m_all = zeros(50,75)
+    z_all = zeros(50,75) .+ 0.5
+    Σ = [ spzeros(Float64,(75,75)) for _ in 1:50]
+
+    rdcm_rigid = RigidRdcm(dcm)
+    out_rigid = rDCM.RigidOutput(0.0,F_r,iter_all,a_all,b_all,m_all,Σ,"test")
+    rdcm_sparse = SparseRdcm(dcm;p0=0.5)
+    out_sparse = rDCM.SparseOutput(0.0,F_r,iter_all,a_all,b_all,m_all,Σ,z_all,"test")
+    @test_throws ErrorException("The output is from a sparse rDCM but the rDCM struct is a rigid rDCM.") LinearDCM(rdcm_rigid,out_sparse)
+    @test_throws ErrorException("The output is from a rigid rDCM but the rDCM struct is a sparse rDCM.") LinearDCM(rdcm_sparse,out_rigid)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -405,7 +418,7 @@ function test_RigiRdcm()
     U = InputU(zeros(scans*16,nu),0.03125)
     Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamLinear(a,c)
-    conf = Confound(ones(3),["Constant"])
+    conf = Confound(ones(scans*16),["Constant"])
     hrf = zeros(scans*16)
 
     @test_throws ErrorException("Dimension mismatch.") RigidRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf)
@@ -418,6 +431,17 @@ function test_RigiRdcm()
     # wrong length of U
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") RigidRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf)
+
+    # test outer constructors
+    dcm = LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
+    RigidRdcm(dcm)
+    # U is nothing
+    dcm = LinearDCM(a,c,scans,nr,nothing,Y,Ep,conf)
+    RigidRdcm(dcm)
+    # U and conf are nothing
+    dcm = LinearDCM(a,c,scans,nr,nothing,Y,Ep,nothing)
+    RigidRdcm(dcm)
+
 end
 
 function test_SparseRdcm()
