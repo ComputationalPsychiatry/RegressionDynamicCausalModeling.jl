@@ -9,8 +9,9 @@ function test_RigidInversionParams()
     @test params.maxIter == 100
     @test params.tol == 1.0e-3
 
-    @test_throws ErrorException RigidInversionParams(;maxIter=-3)
-    @test_throws ErrorException RigidInversionParams(;tol=-2.0e-3)
+    # test sanity check of constructor
+    @test_throws ErrorException("Invalid parameters.") RigidInversionParams(;maxIter=-3)
+    @test_throws ErrorException("Invalid parameters.") RigidInversionParams(;tol=-2.0e-3)
 end
 
 function test_SparseInversionParams()
@@ -21,9 +22,10 @@ function test_SparseInversionParams()
     @test params.reruns == 100
     @test params.restrictInputs == true
 
-    @test_throws ErrorException SparseInversionParams(;maxIter=-200)
-    @test_throws ErrorException SparseInversionParams(;tol=-1.0e-2)
-    @test_throws ErrorException SparseInversionParams(;reruns=-3)
+    # test sanity check of constructor
+    @test_throws ErrorException("Invalid inversion parameters.") SparseInversionParams(;maxIter=-200)
+    @test_throws ErrorException("Invalid inversion parameters.") SparseInversionParams(;tol=-1.0e-2)
+    @test_throws ErrorException("Invalid inversion parameters.") SparseInversionParams(;reruns=-3)
 end
 
 function test_InputU()
@@ -31,35 +33,37 @@ function test_InputU()
 
     @test all(U.name .== ["u_1","u_2","u_3"])
 
-    U = rDCM.InputU(zeros(100,3),0.5,["allStimuli","a","b"])
+    U = InputU(zeros(100,3),0.5,["allStimuli","a","b"])
     @test U.name[2] == "a"
 
-    @test_throws ErrorException rDCM.InputU(zeros(100,3),-2.5)
-    @test_throws ErrorException rDCM.InputU(zeros(100,4),0.5,["a","b","c"])
+    # test sanity check of constructor
+    @test_throws ErrorException("Sampling rate must be positive.") InputU(zeros(100,3),-2.5)
+    @test_throws ErrorException("Size of u and name vector don't match.") InputU(zeros(100,4),0.5,["a","b","c"])
 end
 
 function test_BoldY()
-    Y = rDCM.BoldY(zeros(100,3),0.5)
+    Y = BoldY(zeros(100,3),0.5)
 
     @test all(Y.name .== ["y_1","y_2","y_3"])
 
-    Y = rDCM.BoldY(zeros(100,3),0.5;name=["reg1","reg2","reg3"])
+    Y = BoldY(zeros(100,3),0.5;name=["reg1","reg2","reg3"])
     @test Y.name[2] == "reg2"
 
     # test setter function
-    @test_throws ErrorException Y.name = ["reg1", "reg2"]
-    @test_throws ErrorException Y.name = nothing
-    @test_throws ErrorException Y.y = zeros(100,4)
+    @test_throws ErrorException("Size of y and name vector don't match.") Y.name = ["reg1", "reg2"]
+    @test_throws ErrorException("Cannot set name to nothing because y is not nothig.") Y.name = nothing
+    @test_throws ErrorException("Size of y and name vector don't match.") Y.y = zeros(100,4)
     Y.y = nothing
     @test_throws ErrorException Y.name = ["reg1", "reg2"]
     Y.y = zeros(100,3)
     Y.name = ["a","b","c"]
     @test_throws ErrorException Y.dt = -.5
 
-    @test_throws ErrorException rDCM.BoldY(zeros(100,3),-0.5)
-    @test_throws ErrorException rDCM.BoldY(zeros(100,3),0.5;name=["a","b"])
+    # test sanity check of constructor
+    @test_throws ErrorException("Sampling rate must be positive.") BoldY(zeros(100,3),-0.5)
+    @test_throws ErrorException("Size of y and name vector don't match.") BoldY(zeros(100,3),0.5;name=["a","b"])
 
-    Y = rDCM.BoldY(zeros(100,3),0.5;name=["y1","y2","y3"])
+    Y = BoldY(zeros(100,3),0.5;name=["y1","y2","y3"])
     @test all(Y.name .== ["y1", "y2", "y3"])
 
     # test outer constructor where name is of type Vector{Any}
@@ -82,9 +86,10 @@ function test_TrueParamLinear()
     A_ref = [-0.5347516797591492 0.0; -1.777533428438784 -0.4983027913744254]
     @test all(Tp.A .== A_ref)
 
-    @test_throws ErrorException rDCM.TrueParamLinear(A,ones(49,3))
-    @test_throws ErrorException rDCM.TrueParamLinear(A,ones(49,3),zeros(50),zeros(50),0.0)
-    @test_throws ErrorException rDCM.TrueParamLinear(A,C,zeros(50),zeros(49),0.0)
+    # test sanity check of constructor
+    #@test_throws ErrorException("Size of A and C matrix don't match.") rDCM.TrueParamLinear(A,ones(49,3))
+    @test_throws ErrorException("Size of A and C matrix don't match.") rDCM.TrueParamLinear(A,ones(49,3),zeros(50),zeros(50),0.0)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.TrueParamLinear(A,C,zeros(50),zeros(49),0.0)
 end
 
 function test_TrueParamBilinear()
@@ -113,9 +118,10 @@ function test_TrueParamBilinear()
     @test Tp.B[1,1,1] == B_ref
     @test Tp.C[1,1] == C_ref
 
-    @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,ones(49,3))
-    @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,ones(49,3),zeros(50),zeros(50),0.0)
-    @test_throws ErrorException rDCM.TrueParamBiLinear(A,B,C,zeros(50),zeros(49),0.0)
+    # test sanity check of constructor
+    #@test_throws ErrorException("Size of A, B or C matrix don't match.") rDCM.TrueParamBiLinear(A,B,ones(49,3)) #TODO: make separate test for priormeanBilinear
+    @test_throws ErrorException("Size of A, B or C matrix don't match.") rDCM.TrueParamBiLinear(A,B,ones(49,3),zeros(50),zeros(50),0.0)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.TrueParamBiLinear(A,B,C,zeros(50),zeros(49),0.0)
 end
 
 function test_TrueParamNonLinear()
@@ -124,8 +130,9 @@ function test_TrueParamNonLinear()
     C = ones(50,3)
     D = ones(50,50,50)
 
-    @test_throws ErrorException rDCM.TrueParamNonLinear(A,B,ones(49,3),D,zeros(50),zeros(50),0.0)
-    @test_throws ErrorException rDCM.TrueParamNonLinear(A,B,C,D,zeros(50),zeros(49),0.0)
+    # test sanity check of constructor
+    @test_throws ErrorException("Size of A, B or C matrix don't match.") rDCM.TrueParamNonLinear(A,B,ones(49,3),D,zeros(50),zeros(50),0.0)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.TrueParamNonLinear(A,B,C,D,zeros(50),zeros(49),0.0)
 end
 
 function test_LinearDCM()
@@ -136,39 +143,44 @@ function test_LinearDCM()
     scans = 123
     nr = 2
     nu = size(c,2)
-    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    U = InputU(zeros(scans*16,nu),0.03125)
+    Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamLinear(a,c)
 
     dcm = LinearDCM(a,c,scans,nr,U,Y,Ep,nothing)
 
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(2,3))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(2,4))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.scans = 120
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(3,3)),BitArray(ones(3,4)))
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(2,2)),BitArray(ones(2,4)))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(2,3))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.c = BitMatrix(zeros(2,4))
+    @test_throws ErrorException("Number of regions does not match.") dcm.c = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
+    @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
+    @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.051)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(3,3)),BitArray(ones(3,4)))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(2,2)),BitArray(ones(2,4)))
 
-    @test_throws ErrorException LinearDCM(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,nothing)
-    @test_throws ErrorException LinearDCM(a,c,0,nr,U,Y,Ep,nothing)
-    conf = rDCM.Confound([1.0, 1.0, 1.0, 1.0],["Constant"])
-    @test_throws ErrorException LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
+    @test_throws ErrorException("Inconsistent number of regions.") LinearDCM(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,nothing)
+    @test_throws ErrorException("Invalid number of scans.") LinearDCM(a,c,0,nr,U,Y,Ep,nothing)
+    conf = rDCM.Confound(ones(scans*16+1),["Constant"])
+    @test_throws ErrorException("Confound matrix size and input matrix size don't match.") LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
 
-    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException LinearDCM(a,c,scans,nr,U_long,Y,Ep,nothing)
+    Y_long = BoldY(zeros(scans+1,nr),0.5)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") LinearDCM(a,c,scans,nr,U,Y_long,Ep,nothing)
+
+    #TODO: test for sanity check for r_dt missing
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
     dcm.c = BitMatrix(zeros(2,3))
     dcm.scans = 123
-    dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    dcm.Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    dcm.U = InputU(zeros(scans*16,nu),0.03125)
+    dcm.Y = BoldY(zeros(scans,nr),0.5)
     dcm.Ep = rDCM.TrueParamLinear(a,c)
 end
 
@@ -188,37 +200,45 @@ function test_BiLinearDCM()
 
     dcm = BiLinearDCM(a,b,c,scans,nr,U,Y,Ep,nothing)
 
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(2,3))
-    @test_throws ErrorException dcm.b = BitArray(zeros(2,2,4))
-    @test_throws ErrorException dcm.b = BitArray(zeros(3,2,3))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(2,4))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.scans = 120
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)))
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(2,3))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.b = BitArray(zeros(2,2,4))
+    @test_throws ErrorException("Number of regions does not match.") dcm.b = BitArray(zeros(3,2,3))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.c = BitMatrix(zeros(2,4))
+    @test_throws ErrorException("Number of regions does not match.") dcm.c = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
+    @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+            of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
+    @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)))
 
-    @test_throws ErrorException BiLinearDCM(BitMatrix(ones(3,3)),b,c,scans,nr,U,Y,Ep,nothing)
-    @test_throws ErrorException BiLinearDCM(a,b,c,0,nr,U,Y,Ep,nothing)
-    @test_throws ErrorException BiLinearDCM(a,b,BitMatrix(zeros(2,4)),scans,nr,U,Y,Ep,nothing)
-    conf = rDCM.Confound([1.0, 1.0, 1.0, 1.0],["Constant"])
-    @test_throws ErrorException BiLinearDCM(a,b,c,scans,nr,U,Y,Ep,conf)
+    @test_throws ErrorException("Inconsistent number of regions.") BiLinearDCM(BitMatrix(ones(3,3)),b,c,scans,nr,U,Y,Ep,nothing)
+    @test_throws ErrorException("Invalid number of scans.") BiLinearDCM(a,b,c,0,nr,U,Y,Ep,nothing)
+    @test_throws ErrorException("Number of inputs don't match.") BiLinearDCM(a,b,BitMatrix(zeros(2,4)),scans,nr,U,Y,Ep,nothing)
+    conf = rDCM.Confound(zeros(scans*16+1),["Constant"])
+    @test_throws ErrorException("Confound matrix size and input matrix size don't match.") BiLinearDCM(a,b,c,scans,nr,U,Y,Ep,conf)
 
-    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException BiLinearDCM(a,b,c,scans,nr,U_long,Y,Ep,nothing)
+    U_long = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") BiLinearDCM(a,b,c,scans,nr,U_long,Y,Ep,nothing)
+
+    # wrong sampling rate
+    U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") BiLinearDCM(a,b,c,scans,nr,U_wrong_dt,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
     dcm.b = BitArray(zeros(2,2,3))
     dcm.c = BitMatrix(zeros(2,3))
     dcm.scans = 123
-    dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    dcm.Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    dcm.U = InputU(zeros(scans*16,nu),0.03125)
+    dcm.Y = BoldY(zeros(scans,nr),0.5)
     dcm.Ep = rDCM.TrueParamBiLinear(a,b,c)
 end
 
@@ -234,37 +254,45 @@ function test_NonLinearDCM()
     scans = 123
     nr = 2
     nu = size(c,2)
-    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    U = InputU(zeros(scans*16,nu),0.03125)
+    Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamNonLinear(a,b,c,d)
 
     dcm = NonLinearDCM(a,b,c,d,scans,nr,U,Y,Ep,nothing)
 
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.a = BitMatrix(zeros(2,3))
-    @test_throws ErrorException dcm.b = BitArray(zeros(2,2,4))
-    @test_throws ErrorException dcm.b = BitArray(zeros(3,2,3))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(2,4))
-    @test_throws ErrorException dcm.c = BitMatrix(zeros(3,3))
-    @test_throws ErrorException dcm.d = BitArray(zeros(3,3,3))
-    @test_throws ErrorException dcm.d = BitArray(zeros(2,2,3))
-    @test_throws ErrorException dcm.scans = 120
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans,3),0.5)
-    @test_throws ErrorException dcm.Y = rDCM.BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)),BitArray(zeros(3,3,3)))
-    @test_throws ErrorException dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)),BitArray(zeros(2,2,2)))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(2,3))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.b = BitArray(zeros(2,2,4))
+    @test_throws ErrorException("Number of regions does not match.") dcm.b = BitArray(zeros(3,2,3))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.c = BitMatrix(zeros(2,4))
+    @test_throws ErrorException("Number of regions does not match.") dcm.c = BitMatrix(zeros(3,3))
+    @test_throws ErrorException("Number of regions does not match.") dcm.d = BitArray(zeros(3,3,3))
+    @test_throws ErrorException("Number of regions does not match.") dcm.d = BitArray(zeros(2,2,3))
+    @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
+    @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+            of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
+    @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
+    @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)),BitArray(zeros(3,3,3)))
+    @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)),BitArray(zeros(2,2,2)))
 
-    @test_throws ErrorException NonLinearDCM(BitMatrix(ones(3,3)),b,c,d,scans,nr,U,Y,Ep,nothing)
-    @test_throws ErrorException NonLinearDCM(a,b,c,d,0,nr,U,Y,Ep,nothing)
-    @test_throws ErrorException NonLinearDCM(a,b,BitMatrix(zeros(2,4)),d,scans,nr,U,Y,Ep,nothing)
-    conf = rDCM.Confound([1.0, 1.0, 1.0, 1.0],["Constant"])
-    @test_throws ErrorException NonLinearDCM(a,b,c,d,scans,nr,U,Y,Ep,conf)
+    @test_throws ErrorException("Inconsistent number of regions.") NonLinearDCM(BitMatrix(ones(3,3)),b,c,d,scans,nr,U,Y,Ep,nothing)
+    @test_throws ErrorException("Invalid number of scans.") NonLinearDCM(a,b,c,d,0,nr,U,Y,Ep,nothing)
+    @test_throws ErrorException("Number of inputs don't match.") NonLinearDCM(a,b,BitMatrix(zeros(2,4)),d,scans,nr,U,Y,Ep,nothing)
+    conf = Confound(zeros(scans*16+1),["Constant"])
+    @test_throws ErrorException("Confound matrix size and input matrix size don't match.") NonLinearDCM(a,b,c,d,scans,nr,U,Y,Ep,conf)
 
-    U_long = rDCM.InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException NonLinearDCM(a,b,c,d,scans,nr,U_long,Y,Ep,nothing)
+    U_long = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") NonLinearDCM(a,b,c,d,scans,nr,U_long,Y,Ep,nothing)
+
+    # wrong sampling rate
+    U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") NonLinearDCM(a,b,c,d,scans,nr,U_wrong_dt,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -272,13 +300,13 @@ function test_NonLinearDCM()
     dcm.c = BitMatrix(zeros(2,3))
     dcm.d = BitArray(zeros(2,2,2))
     dcm.scans = 123
-    dcm.U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    dcm.Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    dcm.U = InputU(zeros(scans*16,nu),0.03125)
+    dcm.Y = BoldY(zeros(scans,nr),0.5)
     dcm.Ep = rDCM.TrueParamNonLinear(a,b,c,d)
 end
 
 function test_Options()
-    @test_throws ErrorException Options(RigidInversionParams();synthetic=true,verbose=-1)
+    @test_throws ErrorException("Verbosity level needs to be an integer between 0 and 2.") Options(RigidInversionParams();synthetic=true,verbose=-1)
 end
 
 function test_TrueParam()
@@ -328,16 +356,17 @@ function test_DCM()
     A[1,1] = 0.8
     C = zeros(2,2)
     C[1,1] = -.4
-    U = rDCM.InputU(zeros(100,2),0.25)
+    U = InputU(zeros(100,2),0.25)
     Ep = rDCM.TrueParamLinear(A,C)
     dcm = LinearDCM(A,C,150,2,U,nothing,Ep)
 end
 
 function test_Confound()
-    conf = rDCM.Confound([1.0, 1.0, 1.0, 1.0],["Constant"])
+    conf = Confound([1.0, 1.0, 1.0, 1.0],["Constant"])
     @test all(conf.X0 .== [1.0, 1.0, 1.0, 1.0])
-    conf = rDCM.Confound(zeros(10,2))
+    conf = Confound(zeros(10,2))
     @test all(conf.name .== ["Conf_1", "Conf_2"])
+    @test_throws ErrorException("Size of X0 and name vector don't match.") Confound(zeros(3,2),["Const"])
 end
 
 function test_ModelOutput()
@@ -352,17 +381,17 @@ function test_ModelOutput()
     z_all = zeros(2,2) .+ 0.5
 
     # output of rigid rDCM
-    @test_throws ErrorException rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,"test")
-    @test_throws ErrorException rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
+    @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,"test")
+    @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.RigidOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,"test")
+    @test_throws ErrorException("Invalid number of iterations") rDCM.RigidOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,"test")
+    @test_throws ErrorException("Inconsisten number of regions.") rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
 
     # output of sparse rDCM
-    @test_throws ErrorException rDCM.SparseOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
-    @test_throws ErrorException rDCM.SparseOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,z_all,          "test")
-    @test_throws ErrorException rDCM.SparseOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,z_all,          "test")
-    @test_throws ErrorException rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,zeros(2,2) .- 1,"test")
-    @test_throws ErrorException rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.SparseOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Invalid number of iterations") rDCM.SparseOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Invalid probabilities in posterior Bernoulli.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,zeros(2,2) .- 1,"test")
+    @test_throws ErrorException("Inconsisten number of regions.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
 end
 
 function test_RigiRdcm()
@@ -372,15 +401,23 @@ function test_RigiRdcm()
     c[1,1] = true
     scans = 123
     nr = 2
-    nu = size(c,2) - 1
-    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    nu = size(c,2)
+    U = InputU(zeros(scans*16,nu),0.03125)
+    Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamLinear(a,c)
-    conf = rDCM.Confound(ones(3),["Constant"])
+    conf = Confound(ones(3),["Constant"])
     hrf = zeros(scans*16)
 
-    @test_throws ErrorException RigidRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf)
-    @test_throws ErrorException RigidRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf)
+    @test_throws ErrorException("Dimension mismatch.") RigidRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf)
+    @test_throws ErrorException("Number of inputs don't match.") RigidRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf)
+
+    # wrong sampling rate of U
+    U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") RigidRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf)
+    # wrong length of U
+    U_long = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") RigidRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf)
 end
 
 function test_SparseRdcm()
@@ -390,17 +427,24 @@ function test_SparseRdcm()
     c[1,1] = true
     scans = 123
     nr = 2
-    nu = size(c,2) - 1
-    U = rDCM.InputU(zeros(scans*16,nu),0.03125)
-    Y = rDCM.BoldY(zeros(scans,nr),0.5)
+    nu = size(c,2)
+    U = InputU(zeros(scans*16,nu),0.03125)
+    Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamLinear(a,c)
-    conf = rDCM.Confound(ones(3),["Constant"])
+    conf = Confound(ones(3),["Constant"])
     hrf = zeros(scans*16)
     p0 = 0.5
 
-    @test_throws ErrorException SparseRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf,true,p0)
-    @test_throws ErrorException SparseRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf,true,p0)
-    @test_throws ErrorException SparseRdcm(a,c,scans,nr,U,Y,Ep,conf,hrf,true,1.5)
+    @test_throws ErrorException("Dimension mismatch.") SparseRdcm(BitMatrix(ones(3,3)),c,scans,nr,U,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException("Number of inputs don't match.") SparseRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException("p0 is not a proper Bernoulli parameter.") SparseRdcm(a,c,scans,nr,U,Y,Ep,conf,hrf,true,1.5)
+    U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.") SparseRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf,true,p0)
+    # wrong length of U
+    U_long = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") SparseRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf,true,p0)
+
 end
 
 function test_constructors()
