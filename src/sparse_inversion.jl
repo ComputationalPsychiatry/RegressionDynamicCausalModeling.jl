@@ -63,7 +63,7 @@ function sparse_inversion(
         Σ_r_iter = [spzeros(Float64, (D, D)) for _ in 1:reruns]
         a_r_iter = zeros(reruns)
         b_r_iter = zeros(reruns)
-        iter_r_iter = zeros(Int64, reruns)
+        iter_r_iter = ones(Int64, reruns)
         # TODO: in matlab version they save every rerun also l0 (prior precision) -> this doesn't make any sense
         z_r_iter = zeros(D, reruns)
         F_r_iter = zeros(reruns)

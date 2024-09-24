@@ -464,6 +464,42 @@ ref_sparseOutput = "sparse rDCM output
     @test s == ref_sparseOutput
 end
 
+function test_print_Confound()
+    conf = Confound(zeros(10,0),[])
+    ref_conf = "Confounds\n   X0:    10x0 matrix\n"
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", conf)
+    s = String(take!(io))
+
+    @test s == ref_conf
+
+    conf = Confound(zeros(10,2),["Conf1", "Conf2"])
+    ref_conf = "Confounds\n   X0:    10x2 matrix\n   names: Conf1,...,Conf2\n"
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", conf)
+    s = String(take!(io))
+
+    @test s == ref_conf
+end
+
+function test_print_InputU()
+    U = InputU(zeros(10,0),0.5,[])
+    ref_U = "U (Input)\n   u:  10x0 matrix\n   dt: 0.5s\n"
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", U)
+    s = String(take!(io))
+
+    @test s == ref_U
+
+    U = InputU(zeros(10,1),0.5,["Input1"])
+    ref_U = "U (Input)\n   u:  10x1 matrix\n   dt: 0.5s\n   names: Input1\n"
+    io = IOBuffer()
+    show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", U)
+    s = String(take!(io))
+
+    @test s == ref_U
+end
+
 function test_spm_compat(dcm)
 
     # create rDCM struct
@@ -526,6 +562,8 @@ function testUtils()
             test_print_SparseRdcm(SparseRdcm(copy(dcm)))
             test_print_RigidOutput(RigidRdcm(copy(dcm)))
             test_print_SparseOutput(SparseRdcm(copy(dcm);p0=0.15))
+            test_print_Confound()
+            test_print_InputU()
         end
 
         @testset "SPM compatibility" begin
