@@ -49,7 +49,7 @@ function rigid_inversion(
     b_all = zeros(Float64, nr)
     m_all = zeros(Float64, size(idx)) #one could maybe also make this sparse
     Σ_all = [spzeros(Float64, (size(idx, 2), size(idx, 2))) for _ in 1:nr]
-    iter_all = zeros(Int64, nr)
+    iter_all = ones(Int64, nr)
 
     # array for storing predicted derivative of signal (in frequency domain)
     # yd_fft_pred = zeros(Float64, size(X,1),nr)
@@ -106,7 +106,7 @@ function rigid_inversion(
                 break
             end
 
-            if i == maxIter # TODO: write test
+            if i == maxIter
                 @warn "Reached maximum number of iterations for region $(r)."
             end
 

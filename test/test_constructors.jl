@@ -29,7 +29,7 @@ function test_SparseInversionParams()
 end
 
 function test_InputU()
-    U = rDCM.InputU(zeros(100,3),0.5)
+    U = InputU(zeros(100,3),0.5)
 
     @test all(U.name .== ["u_1","u_2","u_3"])
 

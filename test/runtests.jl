@@ -1,11 +1,10 @@
 using Aqua: Aqua
 using JET
 using JuliaFormatter: JuliaFormatter
+using Logging
 using MAT: matopen
 using Test
 using RegressionDynamicCausalModeling
-# using Scratch
-# using LazyArtifacts
 using Random
 using SparseArrays: spzeros
 
