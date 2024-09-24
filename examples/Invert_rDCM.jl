@@ -46,6 +46,18 @@ output = invert(rdcm, opt)
 y_pred = predict(rdcm, output)
 plot(p1, y_pred[:, 1]; label="predicted signal")
 
+# Visualize the posterior mean of the A matrix
+heatmap(
+    output.m_all[:, 1:50];
+    yflip=true,
+    title="Posterior mean A matrix",
+    titlefontsize=8,
+    xlabel="region from",
+    ylabel="region to",
+    aspect_ratio=1,
+    size=(350, 350),
+)
+
 # ## sparse rDCM
 # We load again the example DCM and generate BOLD signal with an SNR of 3.
 dcm = load_example_DCM()
