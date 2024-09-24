@@ -732,7 +732,7 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
         end
 
         if size(U.u, 2) ≠ size(c, 2)
-            error("Dimension mismatch.")
+            error("Number of inputs don't match.")
         end
         y = Y.y # for JET not to throw error
         if !isnothing(y)
@@ -800,7 +800,7 @@ Base.@kwdef mutable struct SparseRdcm <: RDCM
         end
 
         if size(U.u, 2) ≠ size(c, 2)
-            error("Dimension mismatch.")
+            error("Number of inputs don't match.")
         end
 
         if p0 < 0.0 || p0 > 1.0
@@ -1212,9 +1212,6 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
             end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
-            end
         end
         setfield!(val, :Y, x)
     elseif key == :Ep
@@ -1327,9 +1324,6 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
             catch
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
-            end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
@@ -1456,9 +1450,6 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
             catch
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
-            end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
