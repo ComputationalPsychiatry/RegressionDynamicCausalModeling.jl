@@ -1487,11 +1487,9 @@ function RigidRdcm(dcm::LinearDCM)
 
     # U is nothing
     r_dt = 16 # assumes microtime resolution is 16
-    y = dcm.Y.y # need to do this otherwise JET.jl gives a false positive (1/2 union split)
-    if !isnothing(y)
+    y = dcm.Y.y
+    if !isnothing(y) # need to do this otherwise JET.jl gives a false positive (1/2 union split)
         N = size(y, 1) * r_dt
-    else
-        @error "y (BOLD signal) is empty."
     end
     u_dt = dcm.Y.dt / r_dt
     U = InputU(zeros(N, 0), u_dt, [])
