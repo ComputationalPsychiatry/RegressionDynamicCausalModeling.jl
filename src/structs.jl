@@ -242,9 +242,19 @@ struct InputU
     end
 end
 
-#Base.@kwdef mutable struct Confound
+"""
+$(TYPEDEF)
+
+Information about confounds.
+
+# Fields
+
+$(TYPEDFIELDS)
+"""
 struct Confound
+    "Confound matrix of size number of datapoints times number of confounds."
     X0::Union{Vector{Float64},Matrix{Float64}} # confounds
+    "Confound names"
     name::Vector{String}                       # confound names
 
     # inner constructor with sanity checks
@@ -389,7 +399,7 @@ Base.@kwdef mutable struct LinearDCM <: DCM
             size(Ep.A, 1) ≠ nr
             error("Inconsistent number of regions.")
         end
-        if (!isnothing(Conf) && size(Conf.X0, 1) ≠ size(U.u, 1))
+        if (!isnothing(Conf) && !isnothing(U) && size(Conf.X0, 1) ≠ size(U.u, 1))
             error("Confound matrix size and input matrix size don't match.")
         end
         if scans ≤ 0
@@ -467,7 +477,7 @@ Base.@kwdef mutable struct BiLinearDCM <: DCM
         if size(c, 2) ≠ size(b, 3)
             error("Number of inputs don't match.")
         end
-        if (!isnothing(Conf) && size(Conf.X0, 1) ≠ size(U.u, 1))
+        if (!isnothing(Conf) && !isnothing(U) && size(Conf.X0, 1) ≠ size(U.u, 1))
             error("Confound matrix size and input matrix size don't match.")
         end
         if scans ≤ 0
@@ -546,7 +556,7 @@ Base.@kwdef mutable struct NonLinearDCM <: DCM
         if size(c, 2) ≠ size(b, 3)
             error("Number of inputs don't match.")
         end
-        if (!isnothing(Conf) && size(Conf.X0, 1) ≠ size(U.u, 1))
+        if (!isnothing(Conf) && !isnothing(U) && size(Conf.X0, 1) ≠ size(U.u, 1))
             error("Confound matrix size and input matrix size don't match.")
         end
         if scans ≤ 0
@@ -721,8 +731,8 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
             error("Dimension mismatch.")
         end
 
-        if size(U.u, 2) + size(Conf.X0, 2) ≠ size(c, 2)
-            error("Dimension mismatch.")
+        if size(U.u, 2) ≠ size(c, 2)
+            error("Number of inputs don't match.")
         end
         y = Y.y # for JET not to throw error
         if !isnothing(y)
@@ -789,8 +799,8 @@ Base.@kwdef mutable struct SparseRdcm <: RDCM
             error("Dimension mismatch.")
         end
 
-        if size(U.u, 2) + size(Conf.X0, 2) ≠ size(c, 2)
-            error("Dimension mismatch.")
+        if size(U.u, 2) ≠ size(c, 2)
+            error("Number of inputs don't match.")
         end
 
         if p0 < 0.0 || p0 > 1.0
@@ -1202,9 +1212,6 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
             end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
-            end
         end
         setfield!(val, :Y, x)
     elseif key == :Ep
@@ -1317,9 +1324,6 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
             catch
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
-            end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
             end
         end
         setfield!(val, :Y, x)
@@ -1447,9 +1451,6 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
                 error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.")
             end
-            if size(x.y, 1) ≠ size(val.U.u, 1) / r_dt
-                error("Length of BOLD signal and driving input u is inconsisten.")
-            end
         end
         setfield!(val, :Y, x)
     elseif key == :Ep
@@ -1472,45 +1473,35 @@ $(TYPEDSIGNATURES)
 Construct a [`$(FUNCTIONNAME)`](@ref) based on a linear DCM.
 """
 function RigidRdcm(dcm::LinearDCM)
-    hrf = get_hrf(dcm) #TODO: check first if dcm.U exists and then do hrf
+    hrf = get_hrf(dcm)
+    # Conf is nothing, U exists
     if isnothing(dcm.Conf) & !isnothing(dcm.U)
         Conf = Confound(ones(size(dcm.U.u, 1)), ["Constant"])
-        c = [dcm.c BitMatrix(ones(dcm.nr, 1))]
-        return RigidRdcm(dcm.a, c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, Conf, hrf)
+        return RigidRdcm(dcm.a, dcm.c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, Conf, hrf)
+        # Conf exists, U exists
     elseif !isnothing(dcm.Conf) & !isnothing(dcm.U)
         return RigidRdcm(
             dcm.a, dcm.c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, dcm.Conf, hrf
         )
     end
-    # case where dcm.U is nothing
 
+    # U is nothing
     r_dt = 16 # assumes microtime resolution is 16
-    y = dcm.Y.y # need to do this otherwise JET.jl gives a false positive (1/2 union split)
-    if !isnothing(y)
+    y = dcm.Y.y
+    if !isnothing(y) # need to do this otherwise JET.jl gives a false positive (1/2 union split)
         N = size(y, 1) * r_dt
-    else
-        @error "y (BOLD signal) is empty."
     end
     u_dt = dcm.Y.dt / r_dt
-    U = InputU(zeros(N, 1), u_dt, ["null"])
+    U = InputU(zeros(N, 0), u_dt, [])
     c = BitMatrix(zeros(dcm.nr, size(U.u, 2)))
-    if isnothing(dcm.Conf)
+    Conf = dcm.Conf
+    # Conf is nothing
+    if isnothing(Conf)
         Conf = Confound(zeros(N, 0), [])
-        return RigidRdcm(dcm.a, c, dcm.scans, dcm.nr, U, dcm.Y, dcm.Ep, Conf, hrf)
-    else
-        return RigidRdcm(dcm.a, c, dcm.scans, dcm.nr, U, dcm.Y, dcm.Ep, dcm.Conf, hrf)
     end
+    # Conf exist
+    return RigidRdcm(dcm.a, c, dcm.scans, dcm.nr, U, dcm.Y, dcm.Ep, Conf, hrf)
 end
-
-# function RigidRdcm(dcm::T,hrf::Vector{Float64}) where T <:DCM
-#     if isnothing(dcm.Conf)
-#         Conf = Confound(ones(size(dcm.U.u,1)),["Constant"])
-#         c = [dcm.c BitMatrix(ones(dcm.nr,1))]
-#         RigidRdcm(dcm.a,c,dcm.scans,dcm.nr,dcm.U,dcm.Y,dcm.Ep,Conf,hrf)
-#     else
-#         RigidRdcm(dcm.a,dcm.c,dcm.scans,dcm.nr,dcm.U,dcm.Y,dcm.Ep,dcm.Conf,hrf)
-#     end
-# end
 
 #---------------------------------------------------------------------------
 # outer constructors for SparseRdcm
@@ -1527,38 +1518,15 @@ Construct a [`$(FUNCTIONNAME)`](@ref) based on a linear DCM.
 """
 function SparseRdcm(dcm::LinearDCM; inform_p0=false, p0=0.5)
     hrf = get_hrf(dcm)
-    if isnothing(dcm.Conf)
+    Conf = dcm.Conf
+    if isnothing(Conf)
         Conf = Confound(ones(size(dcm.U.u, 1)), ["Constant"])
-        c = [dcm.c BitMatrix(ones(dcm.nr, 1))]
-        SparseRdcm(
-            dcm.a, c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, Conf, hrf, inform_p0, p0
-        )
-    else
-        SparseRdcm(
-            dcm.a,
-            dcm.c,
-            dcm.scans,
-            dcm.nr,
-            dcm.U,
-            dcm.Y,
-            dcm.Ep,
-            dcm.Conf,
-            hrf,
-            inform_p0,
-            p0,
-        )
+        #c = [dcm.c BitMatrix(ones(dcm.nr, 1))]
     end
+    return SparseRdcm(
+        dcm.a, dcm.c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, Conf, hrf, inform_p0, p0
+    )
 end
-
-# function SparseRdcm(dcm::T,hrf::Vector{Float64};inform_p0=false,p0=0.5) where T <:DCM
-#     if isnothing(dcm.Conf)
-#         Conf = Confound(ones(size(dcm.U.u,1)),["Constant"])
-#         c = [dcm.c BitMatrix(ones(dcm.nr,1))]
-#         SparseRdcm(dcm.a,c,dcm.scans,dcm.nr,dcm.U,dcm.Y,dcm.Ep,Conf,hrf,inform_p0,p0)
-#     else
-#         SparseRdcm(dcm.a,dcm.c,dcm.scans,dcm.nr,dcm.U,dcm.Y,dcm.Ep,dcm.Conf,hrf,inform_p0,p0)
-#     end
-# end
 
 #---------------------------------------------------------------------------
 # outer constructors for Options

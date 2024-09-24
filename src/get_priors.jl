@@ -253,7 +253,6 @@ function sample_from_prior(
 end
 
 function get_priors(rdcm::RigidRdcm)
-    #c = [dcm.c BitVector(ones(size(dcm.c,1)))]
     prior = get_prior_stats(rdcm.a, rdcm.c)
 
     # prior mean
@@ -264,9 +263,9 @@ function get_priors(rdcm::RigidRdcm)
     pC_C = 1 ./ prior.pC.C
 
     # prior precision of baseline
-    if sum(pC_C[:, end]) ≠ 0
-        pC_C[:, end] .= 1.0e-8
-    end
+    #if sum(pC_C[:, end]) ≠ 0
+    #    pC_C[:, end] .= 1.0e-8
+    #end
 
     # prior precision
     l0 = [pC_A pC_C]
@@ -276,6 +275,12 @@ function get_priors(rdcm::RigidRdcm)
     b0 = 1.0
 
     return m0, l0, a0, b0
+end
+
+function get_priors(rdcm::T, conf_weights::Union{BitVector,BitMatrix}) where {T<:RDCM}
+    dcm = copy(rdcm)
+    dcm.c = [dcm.c conf_weights]
+    return get_priors(dcm)
 end
 
 function get_priors(rdcm::SparseRdcm)

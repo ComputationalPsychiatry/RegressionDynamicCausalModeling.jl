@@ -64,8 +64,8 @@ export rDCM
 
 # IO
 export load_DCM, save_DCM, load_example_DCM, export_to_SPM
-# Input and BOLD
-export InputU, BoldY
+# Input, BOLD and Confound
+export InputU, BoldY, Confound
 # DCM structs
 export DCM, LinearDCM, BiLinearDCM, NonLinearDCM, RDCM, RigidRdcm, SparseRdcm
 # inversion

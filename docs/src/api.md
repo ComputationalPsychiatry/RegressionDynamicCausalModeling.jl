@@ -18,6 +18,7 @@ NonLinearDCM
 NonLinearDCM(a,b,c,d,scans,nr,U,Y,Ep,Conf)
 InputU
 BoldY
+Confound
 ```
 
 ## rDCMs

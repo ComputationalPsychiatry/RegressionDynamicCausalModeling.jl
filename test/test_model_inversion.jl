@@ -466,10 +466,39 @@ function test_sparseInversion()
 
 end
 
+function test_maxIter_rigid()
+    dcm = load_example_DCM()
+
+    # create rDCM struct
+    dcm = RigidRdcm(dcm)
+
+    # set options for inversion
+    opt = Options(RigidInversionParams(;maxIter=1);synthetic=true,verbose=0,testing=true)
+
+    @test_logs (:warn,"Reached maximum number of iterations for region 50.") min_level=Logging.Warn match_mode=:any invert(dcm,opt)
+end
+
+function test_maxIter_sparse()
+    dcm = load_example_DCM()
+
+    # create rDCM struct
+    dcm = SparseRdcm(dcm;p0=0.15)
+
+    # set options for inversion
+    opt = Options(SparseInversionParams(;reruns=1,restrictInputs=true,maxIter=1);
+        synthetic=true,
+        verbose=0,
+        testing=true)
+
+    @test_logs (:warn,"Reached maximum number of iterations for region 50.") min_level=Logging.Warn match_mode=:any invert(dcm,opt)
+end
+
 function test_model_inversion()
     @testset verbose=true "Model inversion" begin
         test_rigidInversion()
         test_sparseInversion()
+        test_maxIter_rigid()
+        test_maxIter_sparse()
     end
 end
 

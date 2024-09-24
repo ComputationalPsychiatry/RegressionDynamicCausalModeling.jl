@@ -15,6 +15,8 @@
             invert(SparseRdcm(dcm; p0=0.15), opt2)
         end
     catch
+        # COV_EXCL_START
         @info "Precompilation failed."
+        # COV_EXCL_STOP
     end
 end

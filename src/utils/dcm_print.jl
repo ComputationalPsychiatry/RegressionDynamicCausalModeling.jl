@@ -158,10 +158,24 @@ function Base.show(io::IO, Ep::TrueParamNonLinear)
 end
 
 function Base.show(io::IO, U::InputU)
-    print(io, "U (Input)\n",
-                "   u:  ",size(U.u,1),"x",size(U.u,2)," matrix\n",
-                "   dt: ",U.dt,"s\n",
-                "   names: ",U.name[1],",...,",U.name[end],"\n")
+    if length(U.name) == 0
+        print(io, "U (Input)\n",
+            "   u:  ",size(U.u,1),"x",size(U.u,2)," matrix\n",
+            "   dt: ",U.dt,"s\n"
+        )
+    elseif length(U.name) == 1
+        print(io, "U (Input)\n",
+            "   u:  ",size(U.u,1),"x",size(U.u,2)," matrix\n",
+            "   dt: ",U.dt,"s\n",
+            "   names: ",U.name[1],"\n"
+        )
+    else
+        print(io, "U (Input)\n",
+            "   u:  ",size(U.u,1),"x",size(U.u,2)," matrix\n",
+            "   dt: ",U.dt,"s\n",
+            "   names: ",U.name[1],",...,",U.name[end],"\n"
+        )
+    end
 end
 
 function Base.show(io::IO, Y::BoldY)
@@ -181,13 +195,20 @@ function Base.show(io::IO, Y::BoldY)
 end
 
 function Base.show(io::IO, Conf::Confound)
-    try
+    if length(Conf.name) == 0
         print(io, "Confounds\n",
-                    "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n",
-                    "   names: ",Conf.name[1],",...,",Conf.name[end],"\n")
-    catch
+            "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n"
+        )
+    elseif length(Conf.name) == 1
         print(io, "Confounds\n",
-                    "   empty\n")
+            "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n",
+            "   names: ",Conf.name[1],"\n"
+        )
+    else
+        print(io, "Confounds\n",
+            "   X0:    ",size(Conf.X0,1),"x",size(Conf.X0,2)," matrix\n",
+            "   names: ",Conf.name[1],",...,",Conf.name[end],"\n"
+        )
     end
 end
 
