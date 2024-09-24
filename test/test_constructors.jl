@@ -147,7 +147,7 @@ function test_LinearDCM()
     Y = BoldY(zeros(scans,nr),0.5)
     Ep = rDCM.TrueParamLinear(a,c)
 
-    dcm = LinearDCM(a,c,scans,nr,U,Y,Ep,nothing)
+    dcm = LinearDCM(a,c,scans,nr,U,Y,Ep)
 
     @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(3,3))
     @test_throws ErrorException("Number of regions does not match.") dcm.a = BitMatrix(zeros(2,3))
@@ -447,6 +447,21 @@ function test_SparseRdcm()
 
 end
 
+function test_priorMean()
+    nr = 3
+    nu = 4
+    B = zeros(nr,nr,nu)
+    C = zeros(nr,nu)
+    D = zeros(nr,nr,nr)
+    transit = zeros(nr)
+    decay = zeros(nr)
+    epsilon = 0.0
+    A_wrong = zeros(nr+1,nr+1)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.priorMeanLinear(A_wrong,C,transit,decay,epsilon)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.priorMeanBiLinear(A_wrong,B,C,transit,decay,epsilon)
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.priorMeanNonLinear(A_wrong,B,C,D,transit,decay,epsilon)
+end
+
 function test_constructors()
     @testset verbose=true "Constructors" begin
         test_RigidInversionParams()
@@ -466,6 +481,7 @@ function test_constructors()
         test_ModelOutput()
         test_RigiRdcm()
         test_SparseRdcm()
+        test_priorMean()
     end
 end
 
