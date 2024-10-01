@@ -55,11 +55,11 @@ function test_load_DCM(dcm)
         @test Y_dt == dcm.Y.dt
         @test all(cmp.(Y_name,dcm.Y.name[1:5]) .== 0)
 
-        @test_throws ErrorException load_DCM(joinpath(rDCM.tmpdir,"DCM_LargeScaleSmith_model1"))
+        @test_throws ErrorException("Invalid file extension.") load_DCM(joinpath(rDCM.tmpdir,"DCM_LargeScaleSmith_model1"))
 
         save_DCM(joinpath(rDCM.tmpdir,"test.jls"),dcm)
         save_DCM(joinpath(rDCM.tmpdir,"test.mat"),dcm)
-        @test_throws ErrorException save_DCM(joinpath(rDCM.tmpdir,"test"),dcm)
+        @test_throws ErrorException("Invalid file extension.") save_DCM(joinpath(rDCM.tmpdir,"test"),dcm)
 
         dcm_bi = BiLinearDCM(copy(dcm))
         dcm_bi.b[1,1,1] = true
