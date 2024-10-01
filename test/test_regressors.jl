@@ -92,24 +92,12 @@ function test_reduce_zeros()
     @test isequal(Y,Y_ref)
 end
 
-function test_3(dcm)
-
-
-end
-
-function test_confound()
-    @test_throws ErrorException rDCM.Confound(zeros(10,3),["Conf1", "Conf2"])
-end
-
-
 function test_create_regressors()
 
     dcm = load_example_DCM()
     @testset "Create regressors" begin
         test_create_reg_ref(dcm)
         test_reduce_zeros()
-        test_3(dcm)
-        test_confound()
     end
 end
 

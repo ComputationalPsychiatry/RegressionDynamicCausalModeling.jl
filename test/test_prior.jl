@@ -60,7 +60,7 @@ function test_sample_prior(a::BitArray,c::BitArray)
     pE = rDCM.priorMeanLinear(A_unstable,prior.pE.C,prior.pE.transit,prior.pE.decay,prior.pE.epsilon)
     pC = rDCM.priorCovLinear(prior.pC.A,prior.pC.C,prior.pC.transit,prior.pC.decay,prior.pC.epsilon)
 
-    @test_throws ErrorException sample_from_prior(a,c,rDCM.PriorDCMLinear(pE,pC);rng=MersenneTwister(rDCM.FIXEDSEED))
+    @test_throws ErrorException("Not able so sample values such that system is stable.") sample_from_prior(a,c,rDCM.PriorDCMLinear(pE,pC);rng=MersenneTwister(rDCM.FIXEDSEED))
 
     # normal example
     prior = rDCM.get_prior_stats(a,c)
