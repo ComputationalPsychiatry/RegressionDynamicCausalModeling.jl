@@ -121,7 +121,7 @@ function load_MAT_DCM(path::String; verbose=true)
     if haskey(DCM_mat, "Conf")
         try
             if haskey(DCM_mat["Conf"], "name")
-                Conf = Confound(DCM_mat["Conf"]["X0"], DCM_mat["Conf"]["name"])
+                Conf = Confound(DCM_mat["Conf"]["X0"], vec(DCM_mat["Conf"]["name"]))
             else
                 Conf = Confound(DCM_mat["Conf"]["X0"])
             end
