@@ -1,5 +1,5 @@
 """
-    generate_BOLD(dcm; SNR, TR=NaN, rng=MersenneTwister())
+    generate_BOLD(dcm; SNR, TR=NaN, rng=Xoshiro())
 
 Generate synthetic BOLD signal timeseries based on a DCM.
 
@@ -7,7 +7,7 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 - `dcm::T where T <: DCM`: DCM structure (can be a linear, bilinear on nonlinear DCM)
 - `SNR::Real`: Signal to noise ratio
 - `TR::Real`: Sampling interval in seconds (can be omitted if dt is specified in dcm.Y)
-- `rng::MersenneTwister`: Random number generator for noise sampling.
+- `rng::AbstractRNG`: Random number generator for noise sampling.
 
 # Output
 - `y_noise::Matrix{Float64}`: BOLD signal timeseries with noise
@@ -17,12 +17,10 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 
 # Examples
 ```julia-repl
-julia> y_noise, _, _, _ = generate_BOLD(load_example_DCM();SNR=10)
+julia> y_noise, y, x, h = generate_BOLD(load_example_DCM();SNR=10)
 ```
 """
-function generate_BOLD(
-    dcm::T; SNR::Real, TR::Real=NaN, rng=MersenneTwister()
-) where {T<:DCM}
+function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<:DCM}
     dcm_c = copy(dcm)
     r_dt = 1
     if isnan(TR)

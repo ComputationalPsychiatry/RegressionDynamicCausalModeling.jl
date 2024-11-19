@@ -11,7 +11,7 @@ Export a DCM with output after model inversion as an SPM compatible .mat file.
 - `output::RigidOutput`: Output after model inversion.
 # Examples
 ```julia-repl
-julia> save_DCM("DCM.mat",rdcm,output)
+julia> export_to_SPM("DCM.mat",rdcm,output)
 ```
 
 !!! info

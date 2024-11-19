@@ -134,7 +134,7 @@ function predict_error_handling(dcm)
         output = invert(rdcm, opt)
         rdcm.c = BitMatrix(zeros(size(rdcm.c)))
 
-        @test_throws ErrorException predict(rdcm,output)
+        @test_throws ErrorException("Cannot generate data from resting-state DCM.") predict(rdcm,output)
 
     end
 end

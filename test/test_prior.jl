@@ -60,18 +60,19 @@ function test_sample_prior(a::BitArray,c::BitArray)
     pE = rDCM.priorMeanLinear(A_unstable,prior.pE.C,prior.pE.transit,prior.pE.decay,prior.pE.epsilon)
     pC = rDCM.priorCovLinear(prior.pC.A,prior.pC.C,prior.pC.transit,prior.pC.decay,prior.pC.epsilon)
 
-    @test_throws ErrorException sample_from_prior(a,c,rDCM.PriorDCMLinear(pE,pC);rng=MersenneTwister(rDCM.FIXEDSEED))
+    @test_throws ErrorException("Not able so sample values such that system is stable.") sample_from_prior(a,c,rDCM.PriorDCMLinear(pE,pC);rng=MersenneTwister(rDCM.FIXEDSEED))
 
     # normal example
     prior = rDCM.get_prior_stats(a,c)
-    A, C, transit, decay, epsilon = sample_from_prior(a,c,prior;rng=MersenneTwister(rDCM.FIXEDSEED))
+    A, C, transit, decay, epsilon = sample_from_prior(a,c,prior;rng=Xoshiro(rDCM.FIXEDSEED))
 
-    Ep_A = [-0.5231677865060994 0.0 -0.7986242409570947;
-     -1.1850222856258559 -0.49886852758295025 0.0;
-      0.0 0.0 -0.4259224542476115]
-    Ep_C = [-1.14490153172882 0.15614346264074028 -2.641991008076796 0.18702790710363;
-      0.0 0.0 1.0033099014594844 0.5181487878771377;
-        -0.46860588216767457 0.0 1.0823812056084292 0.0]
+    Ep_A = [-0.4671518499331545 0.0 -1.9553465718263805;
+     -2.3462895892117315 -0.5364080617587345 0.0;
+      0.0 0.0 -0.52925813328157]
+    Ep_C = [-0.07258186804586991 0.6316208311167526 1.4386832757114134 -1.175371133217587;
+     0.0 0.0 -0.35416984337044605 -0.5933950393067663;
+      -0.9129233863399265 0.0 0.796126919278033 0.0]
+
 
     Ep_transit = zeros(3)
     Ep_decay   = zeros(3)

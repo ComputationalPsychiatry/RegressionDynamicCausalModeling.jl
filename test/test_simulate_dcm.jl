@@ -80,7 +80,7 @@ function test_HRF(dcm)
         @test all(hrf_ref .≈ hrf[1:20])
 
         dcm.Y.y = nothing
-        @test_throws ErrorException rDCM.get_hrf(dcm)
+        @test_throws ErrorException("BOLD signal is empty.") rDCM.get_hrf(dcm)
     end
 end
 
@@ -307,15 +307,18 @@ end
 function test_error_handling(dcm)
 
     # specified TR is not a multiple of u_dt
-    @test_throws ErrorException generate_BOLD(dcm;SNR=3,TR=0.66)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+            of the input U (u_dt). Cannot proceed.") generate_BOLD(dcm;SNR=3,TR=0.66)
 
     # sampling rate of Y is not a multiple of sampling rate of U
     dcm.Y.dt = 0.66
-    @test_throws ErrorException generate_BOLD(dcm;SNR=3)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                  of the input U (u_dt). Cannot proceed.") generate_BOLD(dcm;SNR=3)
 
     # no sampling rate provided
     dcm.Y = nothing
-    @test_throws ErrorException generate_BOLD(dcm;SNR=3)
+    @test_throws ErrorException("Y field is empty. Please specify the TR of the BOLD signal manually
+            using tapas_rdcm_generate(dcm;TR=value)") generate_BOLD(dcm;SNR=3)
 
 end
 
