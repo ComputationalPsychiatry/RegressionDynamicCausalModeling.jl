@@ -38,18 +38,10 @@ pages = [
     "Home" => "index.md",
     "API reference" => "api.md",
     "Tutorials" => [
-        #"Create DCMs" => joinpath("examples", "DCM_IO.md"),
-        #"Model inversion" => joinpath("examples", "inference.md"),
-        #"Analyzing results" => joinpath("examples", "results.md"),
         "SPM compatibility" => joinpath("examples", "SPM_compat.md"),
         "Construct DCM" => joinpath("examples", "Specify_DCM.md"),
         "Parameter estimation" => joinpath("examples", "Invert_rDCM.md"),
     ],
-    #"Advanced" => [
-    #    "Alternatives" => "alternatives.md",
-    #    "Debugging" => "debugging.md",
-    #    "Formulas" => "formulas.md",
-    #],
 ]
 
 fmt = Documenter.HTML(;
@@ -60,14 +52,14 @@ fmt = Documenter.HTML(;
     collapselevel=1,
     description="A Julia package for estimating effective (i.e., directed) connectivity in large (whole-brain) networks",
     size_threshold_ignore=[joinpath("examples", "Invert_rDCM.md")],
+    #sidebar_sitename=false,
 )
 
 makedocs(;
-    sitename="RegressionDynamicCausalModeling.jl",
+    sitename="RegressionDynamicCausalModeling",
     modules=[RegressionDynamicCausalModeling],
     authors="Imre Kertesz",
     format=fmt,
-    #repo=Remotes.GitHub("https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl.git"),
     pages=pages,
     checkdocs=:exports,
     pagesonly=true,
