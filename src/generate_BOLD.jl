@@ -17,7 +17,7 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 
 # Examples
 ```julia-repl
-julia> y_noise, _, _, _ = generate_BOLD(load_example_DCM();SNR=10)
+julia> y_noise, y, x, h = generate_BOLD(load_example_DCM();SNR=10)
 ```
 """
 function generate_BOLD(
