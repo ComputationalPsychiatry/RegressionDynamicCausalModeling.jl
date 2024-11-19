@@ -12,7 +12,6 @@ function sparse_inversion(
     maxIter = opt.invParams.maxIter
     pr = opt.invParams.tol
     reruns = opt.invParams.reruns
-    # rng = MersenneTwister(opt.invParams.seed)
 
     nr = size(Y_c, 2)
 

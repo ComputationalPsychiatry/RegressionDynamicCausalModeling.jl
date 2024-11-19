@@ -95,7 +95,7 @@ struct Options{T<:AbstractInvParam}
     "Used for testing"
     testing::Bool
     "Random number generator"
-    rng::MersenneTwister
+    rng::AbstractRNG
 
     # inner constructor with sanity checks
     function Options(invParams, verbose, synthetic, testing, rng)
@@ -958,7 +958,7 @@ function TrueParamLinear(A::Matrix{Float64}, C::Matrix{Float64})
 end
 
 function TrueParamLinear(
-    a::BitMatrix, c::BitMatrix; sample=true, fixHRF=true, rng=MersenneTwister()
+    a::BitMatrix, c::BitMatrix; sample=true, fixHRF=true, rng=Xoshiro()
 )
     prior = get_prior_stats(a, c)
 
@@ -991,12 +991,7 @@ function TrueParamBiLinear(A::Matrix{Float64}, B::Array{Float64}, C::Matrix{Floa
 end
 
 function TrueParamBiLinear(
-    a::BitMatrix,
-    b::BitArray{3},
-    c::BitMatrix;
-    sample=true,
-    fixHRF=true,
-    rng=MersenneTwister(),
+    a::BitMatrix, b::BitArray{3}, c::BitMatrix; sample=true, fixHRF=true, rng=Xoshiro()
 )
     prior = get_prior_stats(a, b, c)
     if sample
@@ -1036,7 +1031,7 @@ function TrueParamNonLinear(
     d::BitArray{3};
     sample=true,
     fixHRF=true,
-    rng=MersenneTwister(),
+    rng=Xoshiro(),
 )
     prior = get_prior_stats(a, b, c, d)
 
@@ -1532,12 +1527,12 @@ end
 # outer constructors for Options
 #---------------------------------------------------------------------------
 """
-    Options(invParams::T;synthetic::Bool,verbose=1,testing=false,rng=MersenneTwister())
+    Options(invParams::T;synthetic::Bool,verbose=1,testing=false,rng=Xoshiro())
 
 Constructor for [`$(FUNCTIONNAME)`](@ref). See type description for information about arguments.
 """
 function Options(
-    invParams::T; synthetic::Bool, verbose=1, testing=false, rng=MersenneTwister()
+    invParams::T; synthetic::Bool, verbose=1, testing=false, rng=Xoshiro()
 ) where {T<:AbstractInvParam}
     return Options(invParams, verbose, synthetic, testing, rng)
 end

@@ -104,13 +104,13 @@ function get_prior_stats(a::BitMatrix, b::BitArray{3}, c::BitMatrix, d::BitArray
     return PriorDCMNonLinear(pE, pC)
 end
 
-function sample_from_prior(a::BitMatrix, c::BitMatrix; fixHRF=true, rng=MersenneTwister())
+function sample_from_prior(a::BitMatrix, c::BitMatrix; fixHRF=true, rng=Xoshiro())
     prior = rDCM.get_prior_stats(a, c)
     return sample_from_prior(a, c, prior; fixHRF=fixHRF, rng=rng)
 end
 
 function sample_from_prior(
-    a::BitMatrix, c::BitMatrix, prior::PriorDCMLinear; fixHRF=true, rng=MersenneTwister()
+    a::BitMatrix, c::BitMatrix, prior::PriorDCMLinear; fixHRF=true, rng=Xoshiro()
 )
 
     # prepare mean and variance for connectivity parameters
@@ -158,14 +158,14 @@ function sample_from_prior(
     c::BitMatrix,
     prior::PriorDCMBiLinear;
     fixHRF=true,
-    rng=MersenneTwister(),
+    rng=Xoshiro(),
 )
 
     # prepare mean and variance for connectivity parameters
     mu0 = [prior.pE.A[a]; prior.pE.B[b]; prior.pE.C[c]]
     sigma0 = diagm([prior.pC.A[a]; prior.pC.B[b]; prior.pC.C[c]])
 
-    #rng = MersenneTwister(seed)
+    #rng = Xoshiro(seed)
 
     A_endIdx = sum(a)
     len_b = sum(b)
@@ -207,14 +207,14 @@ function sample_from_prior(
     d::BitArray{3},
     prior::PriorDCMNonLinear;
     fixHRF=true,
-    rng=MersenneTwister(),
+    rng=Xoshiro(),
 )
 
     # prepare mean and variance for connectivity parameters
     mu0 = [prior.pE.A[a]; prior.pE.B[b]; prior.pE.C[c]; prior.pE.D[d]]
     sigma0 = diagm([prior.pC.A[a]; prior.pC.B[b]; prior.pC.C[c]; prior.pC.D[d]])
 
-    #rng = MersenneTwister(seed)
+    #rng = Xoshiro(seed)
 
     A_endIdx = sum(a)
     len_b = sum(b)

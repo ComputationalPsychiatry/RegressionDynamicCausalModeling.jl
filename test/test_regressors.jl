@@ -2,7 +2,7 @@
 function test_create_reg_ref(dcm)
 
     rdcm = RigidRdcm(dcm)
-    X,Y = rDCM.create_regressors!(rdcm,MersenneTwister(1234))
+    X,Y = rDCM.create_regressors!(rdcm,Xoshiro(rDCM.FIXEDSEED))
 
     # values from Matlab implementation
     X_ref1 = [-3158.42013888784 + 0.00000000000000im,
@@ -70,24 +70,15 @@ function test_create_reg_ref(dcm)
     #@test all(X_ref2 .≈ X[1:20,end]) # not passing at the moment, for some reason the last column differs from matlab -> after analysis: there are simply
     # numerical differences between matlab and julia such that it differs (but very small in the order of 1e-15)
     @test all(Y_ref .≈ Y[1:20,1])
-
-    #deprecated
-    # test different set of arguments
-    #X,Y = rDCM.create_regressors!(dcm,rdcm.hrf)
-
-    #@test all(X_ref1 .≈ X[1:20,1])
-    #@test all(X_ref2 .≈ X[1:20,end]) # not passing at the moment, for some reason the last column differs from matlab -> after analysis: there are simply
-    # numerical differences between matlab and julia such that it differs (but very small in the order of 1e-15)
-    #@test all(Y_ref .≈ Y[1:20,1])
 end
 
 function test_reduce_zeros()
     #---------------------------------------------------------------
     X = [1.0 2.0 3.0; 4.0 5.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 0.0]
     Y = [1.0 0.0; 0.0 1.0; 0.0 0.0; 0.0 0.0; 0.0 0.0]
-    Y_ref = [1.0 0.0; 0.0 1.0;0.0 0.0;0.0 0.0;NaN NaN]
+    Y_ref = [1.0 0.0; 0.0 1.0; 0.0 0.0; NaN NaN; 0.0 0.0]
 
-    rDCM.reduce_zeros!(X,Y,MersenneTwister(1234))
+    rDCM.reduce_zeros!(X,Y,Xoshiro(rDCM.FIXEDSEED))
 
     @test isequal(Y,Y_ref)
 end

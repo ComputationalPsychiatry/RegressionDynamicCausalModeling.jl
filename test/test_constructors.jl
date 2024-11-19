@@ -82,8 +82,8 @@ function test_TrueParamLinear()
     a = BitArray(ones(2,2))
     a[1,2] = false
     c = BitArray(zeros(2,3))
-    Tp = rDCM.TrueParamLinear(a,c;rng=MersenneTwister(rDCM.FIXEDSEED))
-    A_ref = [-0.5347516797591492 0.0; -1.777533428438784 -0.4983027913744254]
+    Tp = rDCM.TrueParamLinear(a,c;rng=Xoshiro(rDCM.FIXEDSEED))
+    A_ref = [-0.45072777489973176 0.0; -3.519434383817597 -0.5546120926381016]
     @test all(Tp.A .== A_ref)
 
     # test sanity check of constructor
@@ -108,11 +108,12 @@ function test_TrueParamBilinear()
     b[1,1,1] = true
     c = BitArray(zeros(2,3))
     c[1,1] = true
-    Tp = rDCM.TrueParamBiLinear(a,b,c;rng=MersenneTwister(rDCM.FIXEDSEED))
+    Tp = rDCM.TrueParamBiLinear(a,b,c;rng=Xoshiro(rDCM.FIXEDSEED))
 
-    A_ref = [-0.6390067190365966 0.0; -0.888766714219392 -0.49321116549770155]
-    B_ref = -0.29948409035891055
-    C_ref = 1.7778610980573246
+    A_ref = [-0.30291109959892704 0.0; -1.7597171919087986 -0.7184483705524065]
+    B_ref = -0.7332549644348927
+    C_ref = -0.7021951987576804
+
 
     @test all(Tp.A .== A_ref)
     @test Tp.B[1,1,1] == B_ref

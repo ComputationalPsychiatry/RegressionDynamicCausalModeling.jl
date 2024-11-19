@@ -9,7 +9,7 @@ If there are more zero-valued frequencies than informative ones, subsamples thos
 - `Y::Matrix`: data
 """
 function reduce_zeros!(
-    X::Matrix{T1}, Y::Matrix{T2}, rng::MersenneTwister
+    X::Matrix{T1}, Y::Matrix{T2}, rng::AbstractRNG
 ) where {T1<:Number,T2<:Number}
     # get all indices
     idx = collect(1:size(Y, 1))
@@ -42,7 +42,7 @@ function create_regressors_core(
     u_dt::Float64,
     y_dt::Float64,
     X0::Union{Vector{Float64},Matrix{Float64}},
-    rng::MersenneTwister,
+    rng::AbstractRNG,
 )
     r_dt = 1
     try
@@ -90,7 +90,7 @@ function create_regressors_core(
     return X, Y
 end
 
-function create_regressors!(dcm::T, rng::MersenneTwister) where {T<:RDCM}
+function create_regressors!(dcm::T, rng::AbstractRNG) where {T<:RDCM}
 
     # if isnothing(dcm.Conf)
     #     # add only constant confound
