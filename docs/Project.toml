@@ -6,4 +6,4 @@ RegressionDynamicCausalModeling = "4fb452e6-e726-4794-90dc-adda47b23488"
 
 [compat]
 Documenter = "1"
-julia = "1.10"
+julia = "1.11"
