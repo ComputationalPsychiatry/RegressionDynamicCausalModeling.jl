@@ -1082,7 +1082,7 @@ function LinearDCM(
     c::Matrix{T2},
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 ) where {T1<:Number,T2<:Number}
@@ -1094,7 +1094,7 @@ function LinearDCM(
     c::T2,
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 ) where {T1<:Number,T2<:Number}
@@ -1115,7 +1115,7 @@ function LinearDCM(
     c::BitMatrix,
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 )
