@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Parameter estimation · RegressionDynamicCausalModeling</title><meta name="title" content="Parameter estimation · RegressionDynamicCausalModeling"/><meta property="og:title" content="Parameter estimation · RegressionDynamicCausalModeling"/><meta property="twitter:title" content="Parameter estimation · RegressionDynamicCausalModeling"/><meta name="description" content="A Julia package for estimating effective (i.e., directed) connectivity in large (whole-brain) networks"/><meta property="og:description" content="A Julia package for estimating effective (i.e., directed) connectivity in large (whole-brain) networks"/><meta property="twitter:description" content="A Julia package for estimating effective (i.e., directed) connectivity in large (whole-brain) networks"/><meta property="og:url" content="https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/examples/Invert_rDCM/"/><meta property="twitter:url" content="https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/examples/Invert_rDCM/"/><link rel="canonical" href="https://ComputationalPsychiatry.github.io/RegressionDynamicCausalModeling.jl/examples/Invert_rDCM/"/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">RegressionDynamicCausalModeling</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../api/">API reference</a></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../SPM_compat/">SPM compatibility</a></li><li><a class="tocitem" href="../Specify_DCM/">Construct DCM</a></li><li class="is-active"><a class="tocitem" href>Parameter estimation</a><ul class="internal"><li><a class="tocitem" href="#rDCM-with-fixed-network-architecture"><span>rDCM with fixed network architecture</span></a></li><li><a class="tocitem" href="#sparse-rDCM"><span>sparse rDCM</span></a></li></ul></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Parameter estimation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Parameter estimation</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl/blob/main/examples/Invert_rDCM.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Inferring-effective-connectivity-with-rDCM"><a class="docs-heading-anchor" href="#Inferring-effective-connectivity-with-rDCM">Inferring effective connectivity with rDCM</a><a id="Inferring-effective-connectivity-with-rDCM-1"></a><a class="docs-heading-anchor-permalink" href="#Inferring-effective-connectivity-with-rDCM" title="Permalink"></a></h1><p>In this example we show how to invert a linear DCM with 50 regions using both rDCM with a fixed network architecture and sparse rDCM. In addition to the <a href="https://github.com/ComputationalPsychiatry/RegressionDynamicCausalModeling.jl">RegressionDynamicCausalModeling.jl</a> package, <a href="https://docs.juliaplots.org/stable/">Plots.jl</a> and <a href="https://docs.julialang.org/en/v1/stdlib/Random/">Random.jl</a> are required.</p><h2 id="rDCM-with-fixed-network-architecture"><a class="docs-heading-anchor" href="#rDCM-with-fixed-network-architecture">rDCM with fixed network architecture</a><a id="rDCM-with-fixed-network-architecture-1"></a><a class="docs-heading-anchor-permalink" href="#rDCM-with-fixed-network-architecture" title="Permalink"></a></h2><pre><code class="language-julia hljs">using RegressionDynamicCausalModeling
+using Plots
+using Random
+
+dcm = load_example_DCM() # this loads the example DCM</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Linear DCM
+a:     50x50 matrix
+c:     50x25 matrix
+scans: 2714
+nr:    50
+---------------------------------------------
+U (Input)
+   u:  43424x25 matrix
+   dt: 0.03125s
+   names: u_1,...,u_25
+---------------------------------------------
+Y (BOLD signal)
+   y:  2714x50 matrix
+   dt: 0.5s
+   names: y_1,...,y_50
+---------------------------------------------
+Ep (True parameters)
+    A: 50 x 50 matrix
+    C: 50 x 25 matrix
+    transit: -0.06 ... -0.05
+    decay:   0.10 ... 0.10
+    epsilon: -0.05
+</code></pre><p>We can visualize the network architecture of this DCM:</p><pre><code class="language-julia hljs">heatmap(
+    dcm.a;
+    yflip=true,
+    title=&quot;Network architecture (A matrix)&quot;,
+    titlefontsize=8,
+    legend=:none,
+    xlabel=&quot;region from&quot;,
+    ylabel=&quot;region to&quot;,
+    aspect_ratio=1,
+    size=(350, 350),
+)</code></pre><img src="b7c12a4b.svg" alt="Example block output"/><p>We can use the DCM to generate synthetic data</p><pre><code class="language-julia hljs">y_noise, _, _, _ = generate_BOLD(dcm; SNR=3, rng=MersenneTwister(42));
+dcm.Y.y = y_noise # save BOLD signal in DCM
+p1 = plot(dcm.Y.y[:, 1]; label=&quot;true signal&quot;, title=&quot;BOLD signal of region 1&quot;)</code></pre><img src="41181582.svg" alt="Example block output"/><p>Specify options/hyperparameters for inversion</p><pre><code class="language-julia hljs">opt = Options(RigidInversionParams(); synthetic=true, rng=MersenneTwister(42))
+
+rdcm = RigidRdcm(dcm) # convert the DCM to a rDCM model</code></pre><p>Estimate connectivity</p><pre><code class="language-julia hljs">output = invert(rdcm, opt)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">rigid rDCM output
+    F:   -574988.69
+    F_r: -14474.90 ... -8427.91
+    iterations until convergence per region: 4 ... 5
+    Posteriors:
+        α: 1359.00,...,1359.00
+        β: 3308875.41,...,36960.51
+        μ: 50 x 75 matrix
+        Σ: 50 element vector of matrices</code></pre><p>Based on the estimated parameters we can predict the BOLD signal and compare it to the ground truth</p><pre><code class="language-julia hljs">y_pred = predict(rdcm, output)
+plot(p1, y_pred[:, 1]; label=&quot;predicted signal&quot;)</code></pre><img src="8ea37cef.svg" alt="Example block output"/><p>Visualize the posterior mean of the A matrix</p><pre><code class="language-julia hljs">heatmap(
+    output.m_all[:, 1:50];
+    yflip=true,
+    title=&quot;Posterior mean A matrix&quot;,
+    titlefontsize=8,
+    xlabel=&quot;region from&quot;,
+    ylabel=&quot;region to&quot;,
+    aspect_ratio=1,
+    size=(350, 350),
+)</code></pre><img src="f76c1a19.svg" alt="Example block output"/><h2 id="sparse-rDCM"><a class="docs-heading-anchor" href="#sparse-rDCM">sparse rDCM</a><a id="sparse-rDCM-1"></a><a class="docs-heading-anchor-permalink" href="#sparse-rDCM" title="Permalink"></a></h2><p>We load again the example DCM and generate BOLD signal with an SNR of 3.</p><pre><code class="language-julia hljs">dcm = load_example_DCM()
+y_noise, _, _, _ = generate_BOLD(dcm; SNR=3, rng=MersenneTwister(42));
+dcm.Y.y = y_noise;</code></pre><p>Convert the linear DCM to a sparse rDCM model with a Bernoulli prior of 0.15 (a priori belief about network sparsity). This means we assume that the a priori probability of a connection being present is low.</p><pre><code class="language-julia hljs">rdcm = SparseRdcm(dcm; p0=0.15)</code></pre><p>Specify options/hyperparameters for inversion</p><pre><code class="language-julia hljs">opt = Options(
+    SparseInversionParams(; reruns=100, restrictInputs=true);
+    synthetic=true,
+    rng=MersenneTwister(42),
+)</code></pre><p>Invert the model</p><pre><code class="language-julia hljs">output = invert(rdcm, opt)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">sparse rDCM output
+    F:   -572101.37
+    F_r: -14436.11 ... -8377.39
+    iterations until convergence per region: 9 ... 8
+    Posteriors:
+        α: 1359.00,...,1359.00
+        β: 3167112.30,...,34529.65
+        μ: 50 x 75 matrix
+        Σ: 50 element vector of matrices
+        Z: 50 x 75 matrix</code></pre><p>We can inspect the Bernoulli posterior for each connection</p><pre><code class="language-julia hljs">heatmap(
+    output.z_all[:, 1:50];
+    yflip=true,
+    title=&quot;Posterior over binary indicator variables&quot;,
+    titlefontsize=8,
+    xlabel=&quot;region from&quot;,
+    ylabel=&quot;region to&quot;,
+    aspect_ratio=1,
+    size=(350, 350),
+)</code></pre><img src="db353163.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Specify_DCM/">« Construct DCM</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.8.0 on <span class="colophon-date" title="Tuesday 3 December 2024 09:54">Tuesday 3 December 2024</span>. Using Julia version 1.11.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
