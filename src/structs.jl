@@ -1082,7 +1082,7 @@ function LinearDCM(
     c::Matrix{T2},
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 ) where {T1<:Number,T2<:Number}
@@ -1094,7 +1094,7 @@ function LinearDCM(
     c::T2,
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 ) where {T1<:Number,T2<:Number}
@@ -1115,7 +1115,7 @@ function LinearDCM(
     c::BitMatrix,
     scans::Int64,
     nr::Int64,
-    U::InputU,
+    U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
 )
@@ -1487,12 +1487,12 @@ function RigidRdcm(dcm::LinearDCM)
         N = size(y, 1) * r_dt
     end
     u_dt = dcm.Y.dt / r_dt
-    U = InputU(zeros(N, 0), u_dt, [])
+    U = InputU(zeros(N, 0), u_dt)
     c = BitMatrix(zeros(dcm.nr, size(U.u, 2)))
     Conf = dcm.Conf
     # Conf is nothing
     if isnothing(Conf)
-        Conf = Confound(zeros(N, 0), [])
+        Conf = Confound(zeros(N, 0))
     end
     # Conf exist
     return RigidRdcm(dcm.a, c, dcm.scans, dcm.nr, U, dcm.Y, dcm.Ep, Conf, hrf)
