@@ -54,6 +54,7 @@ function create_regressors_core(
     end
 
     Nu, nu = size(u) #input length and number of inputs
+    Ny, nr = size(y)
 
     # Fourier transform of hemodynamic response function (HRF)
     h_fft = rfft(hrf, 1)
@@ -64,10 +65,17 @@ function create_regressors_core(
     uh = uh[1:r_dt:end, :]
     X0 = X0[1:r_dt:end, :]
 
+    YU = zeros(Ny,nu*nr)
+    for j in 1:nu
+        for i in 1:Ny
+            YU[i,(j-1)*nr+1:j*nr] = uh[i,j] .* y[i,:]
+        end
+    end
+
     uh = [uh X0]
 
     # combine regressors
-    X = [y[1:(end - 1), :] uh[1:(end - 1), :] ./ r_dt]
+    X = [y[1:(end - 1), :] (YU[1:(end - 1), :] ./ r_dt) (uh[1:(end - 1), :] ./ r_dt)]
     Y = (y[2:end, :] .- y[1:(end - 1), :]) ./ y_dt
 
     return X, Y

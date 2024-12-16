@@ -27,3 +27,13 @@ function invert(rdcm::SparseRdcm, opt::Options)
 
     return sparse_inversion(rdcm, X, Y, opt) # new mathematically correct version
 end
+
+function invert(rdcm::BiLinearRigidRdcm, opt::Options)
+    if opt.verbose > 0
+        println("Running model inversion (rigid rDCM)") # COV_EXCL_LINE
+    end
+
+    X, Y = create_regressors!(rdcm, opt.rng)
+
+    return rigid_inversion(rdcm, X, Y, opt)
+end

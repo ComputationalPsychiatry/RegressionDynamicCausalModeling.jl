@@ -54,7 +54,8 @@ include("utils/dcm_print.jl")
 include("utils/SPM_compat.jl")
 include("generate_BOLD.jl")
 include("get_priors.jl")
-include("rigid_inversion.jl")
+#include("rigid_inversion.jl")
+include("rigid_B_inversion.jl")
 include("invert_rDCM.jl")
 include("predict.jl")
 include("sparse_inversion.jl")
@@ -67,7 +68,7 @@ export load_DCM, save_DCM, load_example_DCM, export_to_SPM
 # Input, BOLD and Confound
 export InputU, BoldY, Confound
 # DCM structs
-export DCM, LinearDCM, BiLinearDCM, NonLinearDCM, RDCM, RigidRdcm, SparseRdcm
+export DCM, LinearDCM, BiLinearDCM, NonLinearDCM, RDCM, RigidRdcm, SparseRdcm, BiLinearRigidRdcm
 # inversion
 export Options, RigidInversionParams, SparseInversionParams, invert
 # output

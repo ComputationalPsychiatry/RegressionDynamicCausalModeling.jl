@@ -752,6 +752,63 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
     end
 end
 
+Base.@kwdef mutable struct BiLinearRigidRdcm <: RDCM
+    "Binary indicator matrix for endogenous connectivity"
+    a::BitMatrix
+    "Binary indicator matrix for bi-linear dynamics."
+    b::BitArray{3}
+    "Binary indicator matrix for driving inputs"
+    c::BitMatrix
+    "Number of data points per region"
+    scans::Int64
+    "Number of regions in network"
+    const nr::Int64
+    "Input structure with information about driving input"
+    U::InputU
+    "Data structure containing BOLD signal"
+    Y::BoldY
+    "Connectivity parameters (A and C matrix)"
+    Ep::TrueParamBiLinear #TODO: don't need this for model inversion
+    "Confound structure"
+    Conf::Confound
+    "Hemodynamic response function"
+    hrf::Vector{Float64}
+
+    @doc """
+    $(SIGNATURES)
+
+    Constructor with sanity checks for [`$(FUNCTIONNAME)`](@ref). See type description for information about arguments.
+    """
+    function BiLinearRigidRdcm(a, b, c, scans, nr, U, Y, Ep, Conf, hrf)
+        if size(a, 1) ≠ size(c, 1) ||
+            nr ≠ size(a, 1) ||
+            (!isnothing(Y.y) && size(Matrix{Float64}(Y.y), 2) ≠ nr) ||
+            (!isnothing(Y.y) && size(Matrix{Float64}(Y.y), 1) ≠ scans) ||
+            size(Ep.A, 1) ≠ nr
+            error("Dimension mismatch.")
+        end
+
+        if size(U.u, 2) ≠ size(c, 2)
+            error("Number of inputs don't match.")
+        end
+        y = Y.y # for JET not to throw error
+        if !isnothing(y)
+            r_dt = 1
+            try
+                r_dt = Int(Y.dt / U.dt)
+            catch
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
+                of the input U (u_dt). Cannot proceed.")
+            end
+            if size(y, 1) ≠ size(U.u, 1) / r_dt
+                error("Length of BOLD signal and driving input u is inconsisten.")
+            end
+        end
+
+        return new(a, b, c, scans, nr, U, Y, Ep, Conf, hrf)
+    end
+end
+
 """
 $(TYPEDEF)
 
@@ -1223,6 +1280,17 @@ end
 #---------------------------------------------------------------------------
 # outer constructors and setter function for BiLinearDCM
 #---------------------------------------------------------------------------
+function BiLinearDCM(rdcm::BiLinearRigidRdcm, output::T) where {T<:ModelOutput}
+    Y = BoldY(nothing, rdcm.Y.dt, rdcm.Y.name)
+    nr = rdcm.nr
+    nu = size(rdcm.U.u,2)
+    A = output.m_all[:, 1:nr]
+    B = reshape(output.m_all[:, (nr + 1):(nu+1)*nr],nr,nr,nu)
+    C = output.m_all[:, (nu + 1)*nr+1:end]
+    Ep = TrueParamBiLinear(A, B, C, rdcm.Ep.transit, rdcm.Ep.decay, rdcm.Ep.epsilon)
+    return BiLinearDCM(rdcm.a, rdcm.b, rdcm.c, rdcm.scans, rdcm.nr, rdcm.U, Y, Ep, rdcm.Conf)
+end
+
 function BiLinearDCM(dcm::LinearDCM)
     nu = size(dcm.c, 2)
     nr = size(dcm.a, 1)
@@ -1499,6 +1567,45 @@ function RigidRdcm(dcm::LinearDCM)
 end
 
 #---------------------------------------------------------------------------
+# outer constructors for BiLinearRigidRdcm
+#---------------------------------------------------------------------------
+"""
+$(TYPEDSIGNATURES)
+
+Construct a [`$(FUNCTIONNAME)`](@ref) based on a linear DCM.
+"""
+function BiLinearRigidRdcm(dcm::BiLinearDCM)
+    hrf = get_hrf(dcm)
+    # Conf is nothing, U exists
+    if isnothing(dcm.Conf) & !isnothing(dcm.U)
+        Conf = Confound(ones(size(dcm.U.u, 1)), ["Constant"])
+        return BiLinearRigidRdcm(dcm.a, dcm.b, dcm.c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, Conf, hrf)
+        # Conf exists, U exists
+    elseif !isnothing(dcm.Conf) & !isnothing(dcm.U)
+        return BiLinearRigidRdcm(
+            dcm.a, dcm.b, dcm.c, dcm.scans, dcm.nr, dcm.U, dcm.Y, dcm.Ep, dcm.Conf, hrf
+        )
+    end
+
+    # U is nothing
+    r_dt = 16 # assumes microtime resolution is 16
+    y = dcm.Y.y
+    if !isnothing(y) # need to do this otherwise JET.jl gives a false positive (1/2 union split)
+        N = size(y, 1) * r_dt
+    end
+    u_dt = dcm.Y.dt / r_dt
+    U = InputU(zeros(N, 0), u_dt)
+    c = BitMatrix(zeros(dcm.nr, size(U.u, 2)))
+    Conf = dcm.Conf
+    # Conf is nothing
+    if isnothing(Conf)
+        Conf = Confound(zeros(N, 0))
+    end
+    # Conf exist
+    return BiLinearRigidRdcm(dcm.a, dcm.b, c, dcm.scans, dcm.nr, U, dcm.Y, dcm.Ep, Conf, hrf)
+end
+
+#---------------------------------------------------------------------------
 # outer constructors for SparseRdcm
 #---------------------------------------------------------------------------
 """
@@ -1551,4 +1658,7 @@ function Base.copy(dcm::RigidRdcm)
 end
 function Base.copy(dcm::SparseRdcm)
     return SparseRdcm([deepcopy(getfield(dcm, k)) for k in fieldnames(SparseRdcm)]...)
+end
+function Base.copy(dcm::BiLinearRigidRdcm)
+    return BiLinearRigidRdcm([deepcopy(getfield(dcm, k)) for k in fieldnames(BiLinearRigidRdcm)]...)
 end

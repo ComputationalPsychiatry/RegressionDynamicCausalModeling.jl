@@ -252,7 +252,7 @@ function sample_from_prior(
     return error("Not able so sample values such that system is stable.")
 end
 
-function get_priors(rdcm::RigidRdcm)
+function get_priors(rdcm::RigidRdcm, nu::Int64)
     prior = get_prior_stats(rdcm.a, rdcm.c)
 
     # prior mean
@@ -277,13 +277,42 @@ function get_priors(rdcm::RigidRdcm)
     return m0, l0, a0, b0
 end
 
-function get_priors(rdcm::T, conf_weights::Union{BitVector,BitMatrix}) where {T<:RDCM}
-    dcm = copy(rdcm)
-    dcm.c = [dcm.c conf_weights]
-    return get_priors(dcm)
+function get_priors(rdcm::BiLinearRigidRdcm, nu::Int64)
+    prior = get_prior_stats(rdcm.a, rdcm.b, rdcm.c)
+
+    nr = size(prior.pE.A,1)
+
+    # prior mean
+    m0 = [prior.pE.A reshape(prior.pE.B,nr,nr*nu) prior.pE.C]
+
+    # prior precision
+    pC_A = 1 ./ prior.pC.A
+    pC_B = 1 ./ prior.pC.B
+    pC_C = 1 ./ prior.pC.C
+
+    # prior precision of baseline
+    #if sum(pC_C[:, end]) ≠ 0
+    #    pC_C[:, end] .= 1.0e-8
+    #end
+
+    # prior precision
+    l0 = [pC_A reshape(pC_B,nr,nr*nu) pC_C]
+
+    # setting priors on noise precision
+    a0 = 2.0
+    b0 = 1.0
+
+    return m0, l0, a0, b0
 end
 
-function get_priors(rdcm::SparseRdcm)
+function get_priors(rdcm::T, conf_weights::Union{BitVector,BitMatrix}) where {T<:RDCM}
+    dcm = copy(rdcm)
+    nu = size(dcm.c,2)
+    dcm.c = [dcm.c conf_weights]
+    return get_priors(dcm, nu)
+end
+
+function get_priors(rdcm::SparseRdcm, nu::Int64)
     prior = get_prior_stats(BitMatrix(ones(size(rdcm.a))), BitMatrix(ones(size(rdcm.c))))
 
     A = prior.pE.A
