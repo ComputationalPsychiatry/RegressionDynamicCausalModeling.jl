@@ -7,6 +7,7 @@ based on the contents of the file.
 # Arguments
 - `path::String`: Path to the file to load. Can end with .mat for Matlab files or .jls for data serialized by Julia.
 - `verbose::Bool`: Verbosity
+- `dcm_key::String`: It is assumed that the variable in MATLAB that was saved as a DCM.mat file was called "DCM". If this is not the case, set `dcm_key` to the variable name that was used (applies only when loading .mat files).
 
 # Output
 - `dcm`: DCM struct (can be a linear, bilinear on nonlinear DCM)
@@ -16,10 +17,10 @@ based on the contents of the file.
 julia> dcm = load_DCM("myDCM.jls";verbose=false)
 ```
 """
-function load_DCM(path::String; verbose=true)
+function load_DCM(path::String; verbose=true, dcm_key="DCM")
     extension = splitext(path)[end]
     if extension == ".mat"
-        return load_MAT_DCM(path; verbose=verbose)
+        return load_MAT_DCM(path; verbose=verbose, dcm_key=dcm_key)
     elseif extension == ".jls"
         return deserialize(path)
     else
@@ -65,9 +66,9 @@ Loads a DCM struct in .mat format assuming the SPM naming convention of fields.
 - `dcm::DCM`: DCM struct. Detects automatically if linear, bi-linear or non-linear DCM
 based on dcm.b and dcm.d field.
 """
-function load_MAT_DCM(path::String; verbose=true)
+function load_MAT_DCM(path::String; verbose=true, dcm_key="DCM")
     file = matopen(path)
-    DCM_mat = read(file, collect(keys(file))[1])
+    DCM_mat = read(file, dcm_key)
     close(file)
 
     # try to extract input information
