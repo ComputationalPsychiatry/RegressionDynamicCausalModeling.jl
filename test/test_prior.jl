@@ -83,6 +83,16 @@ function test_sample_prior(a::BitArray,c::BitArray)
     @test all(Ep_transit .≈ transit)
     @test all(Ep_decay .≈ decay)
     @test Ep_epsilon ≈ epsilon
+
+    # sample also HRF params
+    transit_ref = [0.021388841464128085, 0.0474136423020816, 0.006429462759905607]
+    decay_ref = [-0.01467592799178971, -0.018633728172154647, 0.058226560968698854]
+    epsilon_ref = 0.0006366637688044764
+    _, _, transit, decay, epsilon = sample_from_prior(a, c; fixHRF=false, rng=Xoshiro(rDCM.FIXEDSEED))
+
+    @test all(transit_ref .≈ transit)
+    @test all(decay_ref .≈ decay)
+    @test epsilon_ref ≈ epsilon
   end
 end
 

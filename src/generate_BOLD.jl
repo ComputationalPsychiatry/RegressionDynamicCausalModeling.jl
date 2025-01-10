@@ -66,6 +66,15 @@ function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<
     # sampling
     y = y[1:r_dt:end, :]
 
+    # check signal
+    if any(abs.(y) .== Inf) || any(isnan.(y))
+        @warn "BOLD signal contains Inf or NaN. Check data generating parameters or input structure."
+    elseif any(abs.(y) .> 20.0)
+        @warn "BOLD signal contains large values."
+    elseif all(y .== 0.0)
+        @warn "BOLD signal contains only zeros. Check data generating parameters or input structure."
+    end
+
     # add noise
     noise = randn(rng, Float64, size(y)) * diagm(vec(std(y; dims=1) ./ SNR))
 
