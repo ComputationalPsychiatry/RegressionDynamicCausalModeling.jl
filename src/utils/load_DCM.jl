@@ -61,6 +61,7 @@ Loads a DCM struct in .mat format assuming the SPM naming convention of fields.
 # Arguments
 - `path::String`: Path of the file to load. Needs to end with .mat
 - `verbose::Bool`: Verbosity
+- `dcm_key::String`: It is assumed that the variable in MATLAB that was saved as a DCM.mat file was called "DCM". If this is not the case, set `dcm_key` to the variable name that was used.
 
 # Output
 - `dcm::DCM`: DCM struct. Detects automatically if linear, bi-linear or non-linear DCM
@@ -322,7 +323,11 @@ function getfield_special(obj::T, key::Symbol) where {T<:DCM}
     elseif prop isa Nothing
         return Dict()
     else
-        return getfield(obj, key)
+        val = getfield(obj, key)
+        if val isa Int64
+            return Float64(val)
+        end
+        return val
     end
 end
 
