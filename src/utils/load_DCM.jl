@@ -67,7 +67,7 @@ based on dcm.b and dcm.d field.
 """
 function load_MAT_DCM(path::String; verbose=true)
     file = matopen(path)
-    DCM_mat = read(file, collect(keys(file))[1])
+    DCM_mat = read(file, "DCM")
     close(file)
 
     # try to extract input information
@@ -321,7 +321,11 @@ function getfield_special(obj::T, key::Symbol) where {T<:DCM}
     elseif prop isa Nothing
         return Dict()
     else
-        return getfield(obj, key)
+        val = getfield(obj, key)
+        if val isa Int64
+            return Float64(val)
+        end
+        return val
     end
 end
 
