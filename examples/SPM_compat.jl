@@ -1,6 +1,6 @@
 # # SPM compatibility
 #
-# This package allows to load DCMs that were created by [SPM](https://www.fil.ion.ucl.ac.uk/spm/).
+# This package allows to load DCMs that were created by [SPM](https://www.fil.ion.ucl.ac.uk/spm/) [^1].
 # By loading a `DCM.mat` file, information that is relevant for rDCM is extracted, all other
 # fields in the DCM *struct* are ignored. The extracted information is then converted to
 # rDCM's internal representation of a DCM.
@@ -29,3 +29,5 @@
 # ```
 # export_to_SPM("DCM.mat",rdcm,output)
 # ```
+
+# [^1]: tested with SPM12 (7771)
