@@ -138,6 +138,13 @@ function test_generate_linear(dcm)
         @test_logs (:warn,"Overwriting sampling time of Y with TR.") generate_BOLD(dcm;SNR=3,TR=1.0)
         dcm.Y = nothing
         generate_BOLD(dcm;SNR=3, TR=1.0) #TODO: make test for results
+        dcm = load_example_DCM()
+        dcm.U.u .*= 10.0 # set u to larger values such that BOLD signal values go above 20
+        @test_logs (:warn,"BOLD signal contains large values.") generate_BOLD(dcm;SNR=3)
+        dcm.Ep.A[1,1] = 10 # make system unstable
+        @test_logs (:warn,"BOLD signal contains Inf or NaN. Check data generating parameters or input structure.") generate_BOLD(dcm;SNR=3)
+        dcm.U.u[:] .= 0.0 # no input that would drive the system
+        @test_logs (:warn,"BOLD signal contains only zeros. Check data generating parameters or input structure.") generate_BOLD(dcm;SNR=3)
     end
 end
 
