@@ -7,7 +7,7 @@
 [![Code Style: Blue](https://img.shields.io/badge/code%20style-blue-4495d1.svg)](https://github.com/invenia/BlueStyle)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![JET](https://img.shields.io/badge/%E2%9C%88%EF%B8%8F%20tested%20with%20-%20JET.jl%20-%20red)](https://github.com/aviatesk/JET.jl)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14418351.svg)](https://doi.org/10.5281/zenodo.14418351)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14418350.svg)](https://doi.org/10.5281/zenodo.14418350)
 
 This Julia package implements a variant of dynamic causal modeling (DCM) for fMRI that enables computationally efficient inference on effective (i.e., directed) connectivity parameters among brain regions. Due to its computational efficiency, inversion of large (whole-brain) networks becomes feasible. \
 This package is part of [TAPAS](https://translationalneuromodeling.github.io/tapas/) which is a collection of software tools developed by the [Translational Neuromodeling Unit](https://www.tnu.ethz.ch/en/home) (TNU) and collaborators. The goal of these tools is to support clinical neuromodeling, particularly computational psychiatry, computational neurology, and computational psychosomatics.
