@@ -18,26 +18,13 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
     # if !isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
     #     @info "Binary file for Euler integration not found. Using Julia to generate data."
     # end
+
     # number of regions
-    nr = size(dcm.Ep.A, 1)
-    nu = size(dcm.c, 2)
+    nr = size(dcm.a, 1)
     A = copy(dcm.Ep.A')
 
-    # reserve memory
-    B = Array{Float64}(undef, nr, nr, nu)
-    D = Array{Float64}(undef, nr, nr, nr)
-
     # create B and D matrix based on if it's a Linear/Bi-Linear/Non-Linear DCM
-    if dcm isa LinearDCM
-        B .= zeros(nr, nr, nu)
-        D .= zeros(nr, nr, nr)
-    elseif dcm isa BiLinearDCM
-        B .= permutedims(dcm.Ep.B, (2, 1, 3))
-        D .= zeros(nr, nr, nr)
-    elseif dcm isa NonLinearDCM
-        B .= permutedims(dcm.Ep.B, (2, 1, 3))
-        D .= permutedims(dcm.Ep.D, (2, 1, 3))
-    end
+    B, D = get_matrices(dcm)
 
     # driving inputs
     if triple_input
@@ -62,18 +49,8 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
     # parameter list
     # the last two parameters are for B and D matrix respectively
     # if set to 1 we assume we have bi-linear/non-linear DCM
-    dcmTypeB = false
-    dcmTypeD = false
-    if dcm isa LinearDCM
-        paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 0 0])
-    elseif dcm isa BiLinearDCM
-        paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 0])
-        dcmTypeB = true
-    elseif dcm isa NonLinearDCM
-        paramList = vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 1])
-        dcmTypeB = true
-        dcmTypeD = true
-    end
+    paramList = get_param_list(dcm, U, nr)
+
     # neuronal signal and time courses for hemodynamic parameters
     if isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
         x, _, _, v, q = dcm_euler_integration_c(
@@ -95,8 +72,8 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
             size(U, 1),
             nr,
             size(U, 2),
-            dcmTypeB,
-            dcmTypeD,
+            Bool(paramList[6]),
+            Bool(paramList[7]),
         )
     end
 
@@ -127,6 +104,42 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
         )
 
     return y, x
+end
+
+function get_matrices(dcm::LinearDCM)
+    nr = size(dcm.a, 1)
+    nu = size(dcm.c, 2)
+    B = zeros(nr, nr, nu)
+    D = zeros(nr, nr, nr)
+
+    return B, D
+end
+
+function get_matrices(dcm::BiLinearDCM)
+    nr = size(dcm.a, 1)
+    B = permutedims(dcm.Ep.B, (2, 1, 3))
+    D = zeros(nr, nr, nr)
+
+    return B, D
+end
+
+function get_matrices(dcm::NonLinearDCM)
+    B = permutedims(dcm.Ep.B, (2, 1, 3))
+    D = permutedims(dcm.Ep.D, (2, 1, 3))
+
+    return B, D
+end
+
+function get_param_list(dcm::LinearDCM, U, nr)
+    return vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 0 0])
+end
+
+function get_param_list(dcm::BiLinearDCM, U, nr)
+    return vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 0])
+end
+
+function get_param_list(dcm::NonLinearDCM, U, nr)
+    return vec([dcm.U.dt size(U, 1) nr size(U, 2) 0 1 1])
 end
 
 """
