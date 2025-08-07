@@ -324,7 +324,7 @@ function getfield_special(obj::T, key::Symbol) where {T<:DCM}
         return Dict()
     else
         val = getfield(obj, key)
-        if val isa Int64
+        if val isa Int
             return Float64(val)
         end
         return val

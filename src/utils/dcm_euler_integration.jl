@@ -182,9 +182,7 @@ function dcm_euler_integration_c(
     v1_out = Matrix{Cdouble}(undef, nTime, nStates)
     q1_out = Matrix{Cdouble}(undef, nTime, nStates)
 
-    @ccall abspath(
-        joinpath(euler_integration_bin, "libdcm_euler_integration.so")
-    ).dcm_euler_integration(
+    @ccall abspath(joinpath(euler_integration_bin, "libdcm_euler_integration.so")).dcm_euler_integration(
         A::Ref{Cdouble},
         C::Ref{Cdouble},
         U::Ref{Cdouble},
@@ -242,9 +240,9 @@ Perform Euler integration of DCM.
 - `gamma::Float64`: hemodynamic parameter
 - `kappa::Vector{Float64}`: hemodynamic parameter (one for each region)
 - `timeStep::Float64`: Euler step size
-- `nTime::Int64`: total steps
-- `nStates::Int64`: number of regions
-- `nInputs::Int64`: number of inputs
+- `nTime::Int`: total steps
+- `nStates::Int`: number of regions
+- `nInputs::Int`: number of inputs
 - `dcmTypeB::Bool`: is it a Bilinear DCM
 - `dcmTypeD::Bool`: is it a non-linear DCM
 
@@ -267,9 +265,9 @@ function dcm_euler_integration_jl(
     gamma::Float64,
     kappa::Vector{Float64},
     timeStep::Float64,
-    nTime::Int64,
-    nStates::Int64,
-    nInputs::Int64,
+    nTime::Int,
+    nStates::Int,
+    nInputs::Int,
     dcmTypeB::Bool,
     dcmTypeD::Bool,
 )

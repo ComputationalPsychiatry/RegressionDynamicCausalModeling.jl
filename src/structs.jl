@@ -30,7 +30,7 @@ $(TYPEDFIELDS)
 """
 struct RigidInversionParams <: AbstractInvParam
     "Maximum number of iterations per region"
-    maxIter::Int64
+    maxIter::Int
     "Tolerance for convergence"
     tol::Float64
 
@@ -54,11 +54,11 @@ $(TYPEDFIELDS)
 """
 struct SparseInversionParams <: AbstractInvParam
     "Maximum number of iterations per region"
-    maxIter::Int64
+    maxIter::Int
     "Tolerance for convergence"
     tol::Float64
     "Number of reruns"
-    reruns::Int64
+    reruns::Int
     "Whether or not to estimate sparsity for C matrix. If true, the Bernoulli posteriors for the C matrix are not pruned."
     restrictInputs::Bool
 
@@ -73,7 +73,7 @@ end
 
 Base.@kwdef mutable struct RegressorParams
     padding::Bool = false
-    #filterStr::Int64 = 0
+    #filterStr::Int = 0
 end
 
 """
@@ -89,7 +89,7 @@ struct Options{T<:AbstractInvParam}
     "Model specific inversion settings."
     invParams::T
     "Verbosity during inversion (0,1 or 2)"
-    verbose::Int64
+    verbose::Int
     "Whether or not synthetic data is used."
     synthetic::Bool
     "Used for testing"
@@ -121,7 +121,7 @@ struct RigidOutput <: ModelOutput
     "Region specific negative free energy"
     F_r::Vector{Float64}
     "Number of iterations per region until convergence"
-    iter_all::Vector{Int64}
+    iter_all::Vector{Int}
     "Posterior shape parameter for noise"
     a_all::Vector{Float64}
     "Posterior rate parameter for noise"
@@ -129,7 +129,7 @@ struct RigidOutput <: ModelOutput
     "Posterior mean for connectivity parameters"
     m_all::Matrix{Float64}
     "Posterior covariance for connectivity parameters"
-    Σ_all::Vector{SparseMatrixCSC{Float64,Int64}}
+    Σ_all::Vector{SparseMatrixCSC{Float64,Int}}
     "Inversion method"
     inversion::String
 
@@ -173,7 +173,7 @@ struct SparseOutput <: ModelOutput
     "Region specific negative free energy"
     F_r::Vector{Float64}
     "Number of iterations per region until convergence"
-    iter_all::Vector{Int64} # number of iterations per region until convergence
+    iter_all::Vector{Int} # number of iterations per region until convergence
     "Posterior shape parameter for noise"
     a_all::Vector{Float64}
     "Posterior rate parameter for noise"
@@ -181,7 +181,7 @@ struct SparseOutput <: ModelOutput
     "Posterior mean for connectivity parameters"
     m_all::Matrix{Float64}
     "Posterior covariance for connectivity parameters"
-    Σ_all::Vector{SparseMatrixCSC{Float64,Int64}}
+    Σ_all::Vector{SparseMatrixCSC{Float64,Int}}
     "Posterior for binary indicator variables"
     z_all::Matrix{Float64}
     "Inversion method"
@@ -375,9 +375,9 @@ Base.@kwdef mutable struct LinearDCM <: DCM
     "Binary indicator matrix for driving inputs"
     c::BitMatrix
     "number of data points per region"
-    scans::Int64
+    scans::Int
     "number of regions in network"
-    const nr::Int64
+    const nr::Int
     "input structure with information about driving input"
     U::Union{InputU,Nothing}
     "data structure containing BOLD signal"
@@ -448,9 +448,9 @@ Base.@kwdef mutable struct BiLinearDCM <: DCM
     "Binary indicator matrix for driving inputs"
     c::BitMatrix
     "number of data points per region"
-    scans::Int64
+    scans::Int
     "number of regions in network"
-    const nr::Int64
+    const nr::Int
     "input structure with information about driving input"
     U::Union{InputU,Nothing}
     "data structure containing BOLD signal"
@@ -523,9 +523,9 @@ Base.@kwdef mutable struct NonLinearDCM <: DCM
     "Binary indicator matrix for non-linear dynamics"
     d::BitArray{3}
     "number of data points per region"
-    scans::Int64
+    scans::Int
     "number of regions in network"
-    const nr::Int64
+    const nr::Int
     "input structure with information about driving input"
     U::Union{InputU,Nothing}
     "data structure containing BOLD signal"
@@ -703,9 +703,9 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
     "Binary indicator matrix for driving inputs"
     c::BitMatrix
     "Number of data points per region"
-    scans::Int64
+    scans::Int
     "Number of regions in network"
-    const nr::Int64
+    const nr::Int
     "Input structure with information about driving input"
     U::InputU
     "Data structure containing BOLD signal"
@@ -767,9 +767,9 @@ Base.@kwdef mutable struct SparseRdcm <: RDCM
     "Binary indicator matrix for driving inputs"
     c::BitMatrix
     "Number of data points per region"
-    scans::Int64
+    scans::Int
     "Number of regions in network"
-    const nr::Int64
+    const nr::Int
     "Input structure with information about driving input"
     U::InputU
     "Data structure containing BOLD signal"
@@ -858,7 +858,7 @@ function InputU(u::Matrix{Float64}, dt::Float64)
 end
 
 function InputU(
-    u::SparseArrays.SparseMatrixCSC{Float64,Int64}, dt::Float64, name::Vector{Any}
+    u::SparseArrays.SparseMatrixCSC{Float64,Int}, dt::Float64, name::Vector{Any}
 )
     return InputU(Matrix(u), dt, string.(name))
 end
@@ -1071,8 +1071,8 @@ Create linear DCM.
 # Arguments
 - `a::Matrix`: Binary indicator matrix for endogenous connectivity
 - `c::Matrix`: Binary indicator matrix for driving inputs
-- `scans::Int64`: Number of data points per region
-- `nr::Int64`: Number of regions
+- `scans::Int`: Number of data points per region
+- `nr::Int`: Number of regions
 - `U::InputU`: Input structure
 - `Y::Union{BoldY,Nothing}`: Data structure containing BOLD signal, can be nothing
 - `EP::TrueParamLinear`: Connectivity parameters containing A and C matrix
@@ -1080,8 +1080,8 @@ Create linear DCM.
 function LinearDCM(
     a::Matrix{T1},
     c::Matrix{T2},
-    scans::Int64,
-    nr::Int64,
+    scans::Int,
+    nr::Int,
     U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
@@ -1092,8 +1092,8 @@ end
 function LinearDCM(
     a::T1,
     c::T2,
-    scans::Int64,
-    nr::Int64,
+    scans::Int,
+    nr::Int,
     U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,
@@ -1113,8 +1113,8 @@ end
 function LinearDCM(
     a::BitMatrix,
     c::BitMatrix,
-    scans::Int64,
-    nr::Int64,
+    scans::Int,
+    nr::Int,
     U::Union{InputU,Nothing},
     Y::Union{BoldY,Nothing},
     Ep::TrueParamLinear,

@@ -1,2 +1,3 @@
 style = "blue"
 ignore = ["test_*.jl", "dcm_print.jl"]
+normalize_line_endings = "unix"

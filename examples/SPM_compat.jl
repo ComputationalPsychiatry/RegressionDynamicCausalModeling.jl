@@ -19,7 +19,6 @@
 # - Post-hoc optimization (search over all reduced models)
 # - Parametric Empirical Bayes (PEB)
 
-
 # A `DCM.mat` file created by SPM can be loaded by
 # ```
 # dcm = load_DCM("DCM.mat")
