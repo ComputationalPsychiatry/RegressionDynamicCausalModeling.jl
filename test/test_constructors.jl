@@ -388,7 +388,7 @@ function test_ModelOutput()
 
     F = 0.0
     F_r = zeros(2)
-    iter_all = ones(Int64,2)
+    iter_all = ones(Int,2)
     a_all = ones(2)
     b_all = ones(2)
     m_all = zeros(2,2)
@@ -397,13 +397,13 @@ function test_ModelOutput()
     # output of rigid rDCM
     @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,"test")
     @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.RigidOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,"test")
-    @test_throws ErrorException("Invalid number of iterations") rDCM.RigidOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,"test")
+    @test_throws ErrorException("Invalid number of iterations") rDCM.RigidOutput(F,  F_r,zeros(Int,2),a_all,b_all,   m_all,Σ,"test")
     @test_throws ErrorException("Inconsisten number of regions.") rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
 
     # output of sparse rDCM
     @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.SparseOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
     @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,z_all,          "test")
-    @test_throws ErrorException("Invalid number of iterations") rDCM.SparseOutput(F,  F_r,zeros(Int64,2),a_all,b_all,   m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Invalid number of iterations") rDCM.SparseOutput(F,  F_r,zeros(Int,2),a_all,b_all,   m_all,Σ,z_all,          "test")
     @test_throws ErrorException("Invalid probabilities in posterior Bernoulli.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,zeros(2,2) .- 1,"test")
     @test_throws ErrorException("Inconsisten number of regions.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
 end

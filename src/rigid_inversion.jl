@@ -49,12 +49,12 @@ function rigid_inversion(
     b_all = zeros(Float64, nr)
     m_all = zeros(Float64, size(idx)) #one could maybe also make this sparse
     Σ_all = [spzeros(Float64, (size(idx, 2), size(idx, 2))) for _ in 1:nr]
-    iter_all = ones(Int64, nr)
+    iter_all = ones(Int, nr)
 
     # array for storing predicted derivative of signal (in frequency domain)
     # yd_fft_pred = zeros(Float64, size(X,1),nr)
 
-    prog = Progress(nr; enabled=!opt.testing)
+    prog = Progress(nr; enabled=(!opt.testing))
     for r in 1:nr
         idx_y = .!isnan.(Y[:, r])
         idx_r = idx[r, :]
@@ -172,7 +172,7 @@ function update_posterior_rigid!(
 end
 
 function compute_F(
-    N_eff::Int64,
+    N_eff::Int,
     a_r::Float64,
     β_r::Float64,
     QF::Float64,
@@ -183,7 +183,7 @@ function compute_F(
     Σ_r::Matrix{Float64},
     a0::Float64,
     β0::Float64,
-    dim_r::Int64,
+    dim_r::Int,
 )
 
     # compute components of negative free energy

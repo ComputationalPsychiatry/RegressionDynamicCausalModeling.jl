@@ -46,7 +46,7 @@ function sparse_inversion(
 
     # allocate memory
     F_all = zeros(Float64, nr)
-    iter_all = zeros(Int64, nr)
+    iter_all = zeros(Int, nr)
     a_all = zeros(Float64, nr)
     b_all = zeros(Float64, nr)
     m_all = zeros(Float64, nr, D) #one could maybe also make this sparse
@@ -54,7 +54,7 @@ function sparse_inversion(
     z_all = zeros(Float64, nr, D)
 
     # iterate over regions
-    prog = Progress(nr; enabled=!opt.testing)
+    prog = Progress(nr; enabled=(!opt.testing))
     for r in 1:nr
 
         # allocate memory for the results from all reruns
@@ -62,7 +62,7 @@ function sparse_inversion(
         Σ_r_iter = [spzeros(Float64, (D, D)) for _ in 1:reruns]
         a_r_iter = zeros(reruns)
         b_r_iter = zeros(reruns)
-        iter_r_iter = ones(Int64, reruns)
+        iter_r_iter = ones(Int, reruns)
         # TODO: in matlab version they save every rerun also l0 (prior precision) -> this doesn't make any sense
         z_r_iter = zeros(D, reruns)
         F_r_iter = zeros(reruns)
@@ -237,7 +237,7 @@ function update_posterior_sparse!(
     p0::Vector{Float64},
     Z::Matrix{Float64},
     G::Matrix{Float64},
-    D::Int64,
+    D::Int,
     opt::Options,
 )
 
@@ -290,7 +290,7 @@ function update_posterior_sparse!(
 end
 
 function compute_F_sparse(
-    N_eff::Int64,
+    N_eff::Int,
     a_r::Float64,
     b_r::Float64,
     QF::Float64,
@@ -301,7 +301,7 @@ function compute_F_sparse(
     Σ_r::Matrix{Float64},
     a0::Float64,
     b0::Float64,
-    dim_r::Int64,
+    dim_r::Int,
     z_r::Vector{Float64},
     z_idx::BitVector,
     p0::Vector{Float64},

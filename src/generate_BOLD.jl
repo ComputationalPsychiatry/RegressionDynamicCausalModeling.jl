@@ -87,13 +87,13 @@ $(SIGNATURES)
 Generate a hemodynamic response function (HRF) given a certain lenght N and sampling rate u_dt.
 
 # Arguments
-- `N::Int64`: Lenght of HRF
+- `N::Int`: Lenght of HRF
 - `u_dt::Float64`: Repetition time
 
 # Output
 - `hrf::Vector{Float64}`: Hemodynamic response function
 """
-function get_hrf(N::Int64, u_dt::Float64)
+function get_hrf(N::Int, u_dt::Float64)
     r_dt = 1 # in matlab implementation this is effectively always one
     U = zeros(N, 1)
     U[1:r_dt] .= 1
