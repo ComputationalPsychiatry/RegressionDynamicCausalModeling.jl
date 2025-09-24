@@ -13,7 +13,7 @@ const rDCM = RegressionDynamicCausalModeling
 using Distributions
 using DocStringExtensions
 using FFTW: rfft, irfft, fft, ifft
-using LinearAlgebra: tr, inv, logdet, diagm, diag, I, diagind, eigvals
+using LinearAlgebra: tr, inv, logdet, diagm, diag, I, diagind, eigvals, isposdef
 using MAT: matopen, matwrite
 using LazyArtifacts
 using PrecompileTools: @compile_workload, @setup_workload
@@ -47,6 +47,7 @@ Fixed seed to allow reproducible results.
 const FIXEDSEED = 42
 
 include("structs.jl")
+include("constructors.jl")
 include("create_regressors.jl")
 include("utils/load_DCM.jl")
 include("utils/dcm_euler_integration.jl")
