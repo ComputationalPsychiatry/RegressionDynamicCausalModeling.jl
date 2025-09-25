@@ -242,7 +242,7 @@ function update_posterior_sparse!(
 )
 
     # update posterior covariance matrix
-    Σ_r .= inv(τ_r * G + l0_r)
+    Σ_r .= inv(Hermitian(τ_r * G + l0_r)) # TODO: change Hermitian to Symmetric in time domain formulation
 
     # update posterior mean
     μ_r .= Σ_r * (τ_r * Z * V + l0_r * μ0_r)

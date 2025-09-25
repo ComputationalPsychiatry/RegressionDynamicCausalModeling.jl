@@ -151,14 +151,14 @@ struct RigidOutput <: ModelOutput
             size(m_all, 1) ≠ size(Σ_all, 1)
             error("Inconsistent number of regions.")
         end
-        # nr = length(F_r)
-        # idx = m_all .≠ 0.0
-        # for r in 1:nr
-        #     idxᵣ = idx[r,:]
-        #     if !isposdef(Σ_all[r][idxᵣ,idxᵣ])
-        #         error("One or more covariance matrices are not positive definite.")
-        #     end
-        # end
+        nr = length(F_r)
+        idx = m_all .≠ 0.0
+        for r in 1:nr
+            idxᵣ = idx[r, :]
+            if !isposdef(Σ_all[r][idxᵣ, idxᵣ])
+                error("One or more covariance matrices are not positive definite.")
+            end
+        end
 
         return new(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, inversion)
     end
@@ -215,6 +215,15 @@ struct SparseOutput <: ModelOutput
             size(Σ_all, 1) ≠ size(z_all, 1)
             error("Inconsistent number of regions.")
         end
+        nr = length(F_r)
+        idx = m_all .≠ 0.0
+        for r in 1:nr
+            idxᵣ = idx[r, :]
+            if !isposdef(Σ_all[r][idxᵣ, idxᵣ])
+                error("One or more covariance matrices are not positive definite.")
+            end
+        end
+
         return new(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, z_all, inversion)
     end
 end

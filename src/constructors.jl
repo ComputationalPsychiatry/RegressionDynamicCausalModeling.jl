@@ -711,6 +711,10 @@ function Options(
     return Options(invParams, verbose, synthetic, testing, rng)
 end
 
+#---------------------------------------------------------------------------
+# Implementations of copy for custom structs
+#---------------------------------------------------------------------------
+
 function Base.copy(dcm::LinearDCM)
     return LinearDCM([deepcopy(getfield(dcm, k)) for k in fieldnames(LinearDCM)]...)
 end
@@ -725,4 +729,13 @@ function Base.copy(dcm::RigidRdcm)
 end
 function Base.copy(dcm::SparseRdcm)
     return SparseRdcm([deepcopy(getfield(dcm, k)) for k in fieldnames(SparseRdcm)]...)
+end
+
+"""
+    isapproxsymmetric(A)
+
+Check symmetry of matrix A.
+"""
+function isapproxsymmetric(A)
+    return isapprox(A, A'; rtol=1e-12)
 end

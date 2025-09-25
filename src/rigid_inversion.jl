@@ -147,8 +147,8 @@ function update_posterior_rigid!(
     β0::Float64,
 )
 
-    # update posterior covariance matrix
-    Σᵣ .= inv(τᵣ * W + l0ᵣ)
+    # update posterior covariance matrix, Hermitian ensures that matrix inverse is symmetric
+    Σᵣ .= inv(Hermitian(τᵣ * W + l0ᵣ)) # TODO: change Hermitian to Symmetric in time domain formulation
 
     # update posterior mean
     μᵣ .= Σᵣ * (τᵣ * V + l0ᵣ * μ0ᵣ)

@@ -13,7 +13,7 @@ const rDCM = RegressionDynamicCausalModeling
 using Distributions
 using DocStringExtensions
 using FFTW: rfft, irfft, fft, ifft
-using LinearAlgebra: tr, inv, logdet, diagm, diag, I, diagind, eigvals, isposdef
+using LinearAlgebra: tr, inv, logdet, diagm, diag, I, diagind, eigvals, isposdef, Hermitian
 using MAT: matopen, matwrite
 using LazyArtifacts
 using PrecompileTools: @compile_workload, @setup_workload
@@ -26,7 +26,7 @@ using SparseArrays: spzeros, SparseMatrixCSC, SparseArrays
 using SpecialFunctions: digamma, loggamma
 using Statistics
 
-const euler_integration_bin = @get_scratch!("euler_int_bin")
+const euler_integration_bin = @get_scratch!("euler_int_bin") # location of binary for Euler integration
 const tmpdir = @get_scratch!("tmp")
 
 """
