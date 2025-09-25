@@ -321,8 +321,8 @@ function LinearDCM(rdcm::T1, output::T2) where {T1<:RDCM} where {T2<:ModelOutput
     end
     Y = BoldY(nothing, rdcm.Y.dt, rdcm.Y.name)
     nr = rdcm.nr
-    A = output.m_all[:, 1:nr]
-    C = output.m_all[:, (nr + 1):end]
+    A = output.μ[:, 1:nr]
+    C = output.μ[:, (nr + 1):end]
     Ep = TrueParamLinear(A, C, rdcm.Ep.transit, rdcm.Ep.decay, rdcm.Ep.epsilon)
     return LinearDCM(rdcm.a, rdcm.c, rdcm.scans, rdcm.nr, rdcm.U, Y, Ep, rdcm.Conf)
 end

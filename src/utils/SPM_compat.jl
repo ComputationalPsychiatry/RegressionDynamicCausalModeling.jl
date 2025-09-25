@@ -38,7 +38,7 @@ function export_to_SPM(path::String, rdcm::RigidRdcm, output::RigidOutput)
     spm_M = Dict("IS" => output.inversion, "pE" => spm_pE, "pC" => spm_pC)
 
     # error covariance
-    Ce = 1 ./ (output.a_all ./ output.b_all)
+    Ce = 1 ./ (output.α ./ output.β)
     merge!(dcm_dict, Dict("Ce" => Ce))
 
     merge!(dcm_dict, Dict("M" => spm_M))

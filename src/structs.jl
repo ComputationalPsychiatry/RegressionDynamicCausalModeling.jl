@@ -123,44 +123,42 @@ struct RigidOutput <: ModelOutput
     "Number of iterations per region until convergence"
     iter_all::Vector{Int}
     "Posterior shape parameter for noise"
-    a_all::Vector{Float64}
+    α::Vector{Float64}
     "Posterior rate parameter for noise"
-    b_all::Vector{Float64}
+    β::Vector{Float64}
     "Posterior mean for connectivity parameters"
-    m_all::Matrix{Float64}
+    μ::Matrix{Float64}
     "Posterior covariance for connectivity parameters"
-    Σ_all::Vector{SparseMatrixCSC{Float64,Int}}
+    Σ::Vector{SparseMatrixCSC{Float64,Int}}
     "Inversion method"
     inversion::String
 
     # inner constructor with sanity checks
-    function RigidOutput(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, inversion)
+    function RigidOutput(F, F_r, iter_all, α, β, μ, Σ, inversion)
         if sum(F_r) ≠ F
             error(
                 "Sum of region-wise neg. free energies don't sum up to overall neg. free energy.",
             )
         end
-        if any(a_all .≤ 0.0) || any(b_all .≤ 0.0)
+        if any(α .≤ 0.0) || any(β .≤ 0.0)
             error("Found invalid values of the posterior Gamma distribution.")
         end
         if any(iter_all .≤ 0)
             error("Invalid number of iterations")
         end
-        if length(a_all) ≠ length(b_all) ||
-            length(b_all) ≠ size(m_all, 1) ||
-            size(m_all, 1) ≠ size(Σ_all, 1)
+        if length(α) ≠ length(β) || length(β) ≠ size(μ, 1) || size(μ, 1) ≠ size(Σ, 1)
             error("Inconsistent number of regions.")
         end
         nr = length(F_r)
-        idx = m_all .≠ 0.0
+        idx = μ .≠ 0.0
         for r in 1:nr
             idxᵣ = idx[r, :]
-            if !isposdef(Σ_all[r][idxᵣ, idxᵣ])
+            if !isposdef(Σ[r][idxᵣ, idxᵣ])
                 error("One or more covariance matrices are not positive definite.")
             end
         end
 
-        return new(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, inversion)
+        return new(F, F_r, iter_all, α, β, μ, Σ, inversion)
     end
 end
 
@@ -181,50 +179,50 @@ struct SparseOutput <: ModelOutput
     "Number of iterations per region until convergence"
     iter_all::Vector{Int} # number of iterations per region until convergence
     "Posterior shape parameter for noise"
-    a_all::Vector{Float64}
+    α::Vector{Float64}
     "Posterior rate parameter for noise"
-    b_all::Vector{Float64}
+    β::Vector{Float64}
     "Posterior mean for connectivity parameters"
-    m_all::Matrix{Float64}
+    μ::Matrix{Float64}
     "Posterior covariance for connectivity parameters"
-    Σ_all::Vector{SparseMatrixCSC{Float64,Int}}
+    Σ::Vector{SparseMatrixCSC{Float64,Int}}
     "Posterior for binary indicator variables"
-    z_all::Matrix{Float64}
+    Z::Matrix{Float64}
     "Inversion method"
     inversion::String
 
     # inner constructor with sanity checks
-    function SparseOutput(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, z_all, inversion)
+    function SparseOutput(F, F_r, iter_all, α, β, μ, Σ, Z, inversion)
         if sum(F_r) ≠ F
             error(
                 "Sum of region-wise neg. free energies don't sum up to overall neg. free energy.",
             )
         end
-        if any(a_all .≤ 0.0) || any(b_all .≤ 0.0)
+        if any(α .≤ 0.0) || any(β .≤ 0.0)
             error("Found invalid values of the posterior Gamma distribution.")
         end
         if any(iter_all .≤ 0)
             error("Invalid number of iterations")
         end
-        if any(z_all .< 0.0) || any(z_all .> 1.0)
+        if any(Z .< 0.0) || any(Z .> 1.0)
             error("Invalid probabilities in posterior Bernoulli.")
         end
-        if length(a_all) ≠ length(b_all) ||
-            length(b_all) ≠ size(m_all, 1) ||
-            size(m_all, 1) ≠ size(Σ_all, 1) ||
-            size(Σ_all, 1) ≠ size(z_all, 1)
+        if length(α) ≠ length(β) ||
+            length(β) ≠ size(μ, 1) ||
+            size(μ, 1) ≠ size(Σ, 1) ||
+            size(Σ, 1) ≠ size(Z, 1)
             error("Inconsistent number of regions.")
         end
         nr = length(F_r)
-        idx = m_all .≠ 0.0
+        idx = μ .≠ 0.0
         for r in 1:nr
             idxᵣ = idx[r, :]
-            if !isposdef(Σ_all[r][idxᵣ, idxᵣ])
+            if !isposdef(Σ[r][idxᵣ, idxᵣ])
                 error("One or more covariance matrices are not positive definite.")
             end
         end
 
-        return new(F, F_r, iter_all, a_all, b_all, m_all, Σ_all, z_all, inversion)
+        return new(F, F_r, iter_all, α, β, μ, Σ, Z, inversion)
     end
 end
 

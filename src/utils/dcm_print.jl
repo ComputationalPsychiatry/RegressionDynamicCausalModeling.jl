@@ -256,8 +256,8 @@ function Base.show(io::IO, out::RigidOutput)
         μ: %d x %d matrix
         Σ: %d element vector of matrices",out.F,out.F_r[1],out.F_r[end],
         out.iter_all[1],out.iter_all[end],
-        out.a_all[1],out.a_all[end],out.b_all[1],out.b_all[end],
-        size(out.m_all,1),size(out.m_all,2),length(out.Σ_all))
+        out.α[1],out.α[end],out.β[1],out.β[end],
+        size(out.μ,1),size(out.μ,2),length(out.Σ))
 end
 
 function Base.show(io::IO, rdcm::SparseRdcm)
@@ -309,7 +309,7 @@ function Base.show(io::IO, out::SparseOutput)
         μ: %d x %d matrix
         Σ: %d element vector of matrices
         Z: %d x %d matrix",out.F,out.F_r[1],out.F_r[end],out.iter_all[1],out.iter_all[end],
-        out.a_all[1],out.a_all[end],out.b_all[1],out.b_all[end],
-        size(out.m_all,1),size(out.m_all,2),length(out.Σ_all),
-        size(out.z_all,1),size(out.z_all,2))
+        out.α[1],out.α[end],out.β[1],out.β[end],
+        size(out.μ,1),size(out.μ,2),length(out.Σ),
+        size(out.Z,1),size(out.Z,2))
 end
