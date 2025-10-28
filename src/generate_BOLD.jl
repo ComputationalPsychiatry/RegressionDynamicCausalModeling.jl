@@ -62,9 +62,15 @@ function generate_BOLD(
     _, x = dcm_euler_gen(dcm_c, triple_input)
 
     # convolve neuronal signal with HRF
-    for i in 1:nr
-        tmp = ifft(fft(x[:, i]) .* fft([h; zeros(N * 3 - length(h))]))
-        y[:, i] = real(tmp[(N + 1):(2 * N)]) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+    if triple_input
+        for i in 1:nr
+            tmp = ifft(fft(x[:, i]) .* fft([h; zeros(N * 3 - length(h))]))
+            y[:, i] = real(tmp[(N + 1):(2 * N)]) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+        end
+    else
+        for i in 1:nr
+            y[:, i] = real(ifft(fft(x[:, i]) .* fft(h))) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+        end
     end
 
     # sampling
@@ -82,7 +88,11 @@ function generate_BOLD(
     # add noise
     noise = randn(rng, Float64, size(y)) * diagm(vec(std(y; dims=1) ./ SNR))
 
-    return y + noise, y, x[(N + 1):(2 * N), :], h
+    if triple_input
+        return y + noise, y, x[(N + 1):(2 * N), :], h
+    else
+        return y + noise, y, x, h
+    end
 end
 
 """
