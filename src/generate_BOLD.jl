@@ -22,7 +22,9 @@ convolution with HRF)
 julia> y_noise, y, x, h = generate_BOLD(load_example_DCM();SNR=10)
 ```
 """
-function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro(), triple_input=true) where {T<:DCM}
+function generate_BOLD(
+    dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro(), triple_input=true
+) where {T<:DCM}
     dcm_c = copy(dcm)
     r_dt = 1
     if isnan(TR)
