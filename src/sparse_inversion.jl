@@ -69,7 +69,7 @@ function sparse_inversion(
 
         # remove unnecessary data points
         idx_y = .!isnan.(Y[:, r])
-        X_r = X[idx_y, :] # TODO: ckeck if this can be optimised: i.e. using a view or making it immutable
+        X_r = X[idx_y, :]
         Y_r = Y[idx_y, r]
 
         # effective number of data points
@@ -113,12 +113,12 @@ function sparse_inversion(
         W = X_r' * X_r
         V = X_r' * Y_r
 
-        for iter in 1:reruns # Matlab version starts this loop earlier but not necessary (quantities above are constant accros iterations)
+        for iter in 1:reruns # Matlab version starts this loop earlier but not necessary (quantities above are constant across iterations)
             # initialise z_r, τ_r and a_r per region
             z_r = copy(p0)
             τ_r = a0 / b0
             a_r = a0 + N_eff / 2
-            b_r = b0 # TODO: room for optimisation
+            b_r = b0
             z_idx = BitVector(zeros(size(z_r)))
             QF = 0.0
 
@@ -169,7 +169,7 @@ function sparse_inversion(
                     break
                 end
 
-                if i == maxIter # TODO: write test
+                if i == maxIter
                     @warn "Reached maximum number of iterations for region $(r)."
                 end
 
@@ -187,7 +187,7 @@ function sparse_inversion(
                 N_eff, a_r, b_r, QF, τ_r, l0_r, μ_r, μ0_r, Σ_r, a0, b0, D, z_r, z_idx, p0
             )
 
-            # asign iteration-specific values
+            # assign iteration-specific values
             μ_r_iter[:, iter] = μ_r
             z_r_iter[:, iter] = z_r
             Σ_r_iter[iter][:, :] = Σ_r
@@ -242,7 +242,7 @@ function update_posterior_sparse!(
 )
 
     # update posterior covariance matrix
-    Σ_r .= inv(τ_r * G + l0_r)
+    Σ_r .= inv(Hermitian(τ_r * G + l0_r)) # TODO: change Hermitian to Symmetric in time domain formulation
 
     # update posterior mean
     μ_r .= Σ_r * (τ_r * Z * V + l0_r * μ0_r)
@@ -267,9 +267,9 @@ function update_posterior_sparse!(
 
     # iterate over all binary variables
     for i in order
-        z_r[i] = 1.0 # todo: why are we doing this?
-        g[i] = g[i] - τ_r * z_r' * A[:, i]
-        z_r[i] = 1.0 / (1.0 + exp(-g[i])) #this is different from matlab version because we take the real
+        z_r[i] = 1.0
+        g[i] -= τ_r * z_r' * A[:, i]
+        z_r[i] = 1.0 / (1.0 + exp(-g[i]))
     end
 
     # create Z matrix (binary indicators on diagonal)

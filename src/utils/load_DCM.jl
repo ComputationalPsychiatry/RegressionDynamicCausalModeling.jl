@@ -143,7 +143,7 @@ function load_MAT_DCM(path::String; verbose=true, dcm_key="DCM")
     # check if non-linear DCM
     #---------------------------------------------------------------------------------------
     if haskey(DCM_mat, "d")
-        if sum(DCM_mat["d"]) != 0 && all(size(DCM_mat["d"]) .!= 0)
+        if sum(DCM_mat["d"]) != 0 && !isempty(DCM_mat["d"])
             if !haskey(DCM_mat, "Ep")
                 if verbose
                     @info "Ep field missing, using default values."
@@ -200,7 +200,7 @@ function load_MAT_DCM(path::String; verbose=true, dcm_key="DCM")
     #---------------------------------------------------------------------------------------
     # check if bi-linear DCM
     #---------------------------------------------------------------------------------------
-    if haskey(DCM_mat, "b") && sum(DCM_mat["b"]) != 0.0 && all(size(DCM_mat["b"]) .!= 0)
+    if haskey(DCM_mat, "b") && sum(DCM_mat["b"]) != 0.0 && !isempty(DCM_mat["b"])
         if !haskey(DCM_mat, "Ep")
             if verbose
                 @info "Ep field missing, using default values."

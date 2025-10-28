@@ -94,10 +94,10 @@ function test_rigidInversion()
         -8.689259265429027e-8 8.391893482258539e-8 0.0 0.0 7.704000346831523e-8]
 
         @test F_ref ≈ output.F
-        @test all(a_ref .≈ output.a_all)
-        @test all(b_ref .≈ output.b_all[1:20])
-        @test all(m_ref .≈ output.m_all[1:9,1:9])
-        @test all(Σ_ref .≈ output.Σ_all[1][1:5,1:5])
+        @test all(a_ref .≈ output.α)
+        @test all(b_ref .≈ output.β[1:20])
+        @test all(m_ref .≈ output.μ[1:9,1:9])
+        @test all(Σ_ref .≈ output.Σ[1][1:5,1:5])
 
         # Matlab result
         # A_mat = [-0.416024957356795	0.395111621322398	0	0	0.288189637587704;
@@ -376,11 +376,11 @@ function test_sparseInversion()
         0.0 1.0 0.0]
 
         @test all(F_ref .≈ out.F_r[1:10])
-        @test all(a_ref .≈ out.a_all)
-        @test all(b_ref .≈ out.b_all[1:20])
-        @test all(m_ref .≈ out.m_all[1:9,1:9])
-        @test all(Σ_ref .≈ out.Σ_all[1][1:5,1:5])
-        @test all(z_ref .≈ out.z_all[1:11,1:3])
+        @test all(a_ref .≈ out.α)
+        @test all(b_ref .≈ out.β[1:20])
+        @test all(m_ref .≈ out.μ[1:9,1:9])
+        @test all(Σ_ref .≈ out.Σ[1][1:5,1:5])
+        @test all(z_ref .≈ out.Z[1:11,1:3])
 
 
     end
@@ -457,11 +457,11 @@ function test_sparseInversion()
             0.9999999999999905 1.0 1.0]
 
         @test all(F_ref .≈ out.F_r[1:10])
-        @test all(a_ref .≈ out.a_all)
-        @test all(b_ref .≈ out.b_all[1:20])
-        @test all(m_ref .≈ out.m_all[1:4,1:4])
-        @test all(Σ_ref .≈ out.Σ_all[1][1:4,1:4])
-        @test all(z_ref .≈ out.z_all[1:11,1:3])
+        @test all(a_ref .≈ out.α)
+        @test all(b_ref .≈ out.β[1:20])
+        @test all(m_ref .≈ out.μ[1:4,1:4])
+        @test all(Σ_ref .≈ out.Σ[1][1:4,1:4])
+        @test all(z_ref .≈ out.Z[1:11,1:3])
     end
 
 end

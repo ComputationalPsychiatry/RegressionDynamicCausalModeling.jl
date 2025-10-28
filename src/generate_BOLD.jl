@@ -1,5 +1,5 @@
 """
-    generate_BOLD(dcm; SNR, TR=NaN, rng=Xoshiro())
+    generate_BOLD(dcm; SNR, TR=NaN, rng=Xoshiro(), triple_input=true)
 
 Generate synthetic BOLD signal timeseries based on a DCM.
 
@@ -8,6 +8,8 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 - `SNR::Real`: Signal to noise ratio
 - `TR::Real`: Sampling interval in seconds (can be omitted if dt is specified in dcm.Y)
 - `rng::AbstractRNG`: Random number generator for noise sampling.
+- `triple_input::Bool`: whether or not to triple the input (to avoid edge effects during
+convolution with HRF)
 
 # Output
 - `y_noise::Matrix{Float64}`: BOLD signal timeseries with noise
@@ -20,7 +22,9 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 julia> y_noise, y, x, h = generate_BOLD(load_example_DCM();SNR=10)
 ```
 """
-function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<:DCM}
+function generate_BOLD(
+    dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro(), triple_input=true
+) where {T<:DCM}
     dcm_c = copy(dcm)
     r_dt = 1
     if isnan(TR)
@@ -55,12 +59,18 @@ function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<
     h = get_hrf(N, dcm_c.U.dt)
 
     # compute neuronal signal x
-    _, x = dcm_euler_gen(dcm_c, true)
+    _, x = dcm_euler_gen(dcm_c, triple_input)
 
     # convolve neuronal signal with HRF
-    for i in 1:nr
-        tmp = ifft(fft(x[:, i]) .* fft([h; zeros(N * 3 - length(h))]))
-        y[:, i] = real(tmp[(N + 1):(2 * N)]) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+    if triple_input
+        for i in 1:nr
+            tmp = ifft(fft(x[:, i]) .* fft([h; zeros(N * 3 - length(h))]))
+            y[:, i] = real(tmp[(N + 1):(2 * N)]) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+        end
+    else
+        for i in 1:nr
+            y[:, i] = real(ifft(fft(x[:, i]) .* fft(h))) # need to take real part because imaginary part is not exactly zero due to numerical reasons
+        end
     end
 
     # sampling
@@ -78,7 +88,11 @@ function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<
     # add noise
     noise = randn(rng, Float64, size(y)) * diagm(vec(std(y; dims=1) ./ SNR))
 
-    return y + noise, y, x[(N + 1):(2 * N), :], h
+    if triple_input
+        return y + noise, y, x[(N + 1):(2 * N), :], h
+    else
+        return y + noise, y, x, h
+    end
 end
 
 """

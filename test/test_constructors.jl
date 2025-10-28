@@ -51,7 +51,7 @@ function test_BoldY()
 
     # test setter function
     @test_throws ErrorException("Size of y and name vector don't match.") Y.name = ["reg1", "reg2"]
-    @test_throws ErrorException("Cannot set name to nothing because y is not nothig.") Y.name = nothing
+    @test_throws ErrorException("Cannot set name to nothing because y is not nothing.") Y.name = nothing
     @test_throws ErrorException("Size of y and name vector don't match.") Y.y = zeros(100,4)
     Y.y = nothing
     @test_throws ErrorException Y.name = ["reg1", "reg2"]
@@ -156,7 +156,7 @@ function test_LinearDCM()
     @test_throws ErrorException("Number of regions does not match.") dcm.c = BitMatrix(zeros(3,3))
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
                 of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
@@ -172,7 +172,7 @@ function test_LinearDCM()
     @test_throws ErrorException("Confound matrix size and input matrix size don't match.") LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
 
     Y_long = BoldY(zeros(scans+1,nr),0.5)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") LinearDCM(a,c,scans,nr,U,Y_long,Ep,nothing)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") LinearDCM(a,c,scans,nr,U,Y_long,Ep,nothing)
 
     F_r = zeros(50)
     iter_all = ones(50)
@@ -222,7 +222,7 @@ function test_BiLinearDCM()
     @test_throws ErrorException("Number of regions does not match.") dcm.c = BitMatrix(zeros(3,3))
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
             of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
@@ -239,7 +239,7 @@ function test_BiLinearDCM()
     @test_throws ErrorException("Confound matrix size and input matrix size don't match.") BiLinearDCM(a,b,c,scans,nr,U,Y,Ep,conf)
 
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") BiLinearDCM(a,b,c,scans,nr,U_long,Y,Ep,nothing)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") BiLinearDCM(a,b,c,scans,nr,U_long,Y,Ep,nothing)
 
     # wrong sampling rate
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
@@ -284,7 +284,7 @@ function test_NonLinearDCM()
     @test_throws ErrorException("Number of regions does not match.") dcm.d = BitArray(zeros(2,2,3))
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
             of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
@@ -301,7 +301,7 @@ function test_NonLinearDCM()
     @test_throws ErrorException("Confound matrix size and input matrix size don't match.") NonLinearDCM(a,b,c,d,scans,nr,U,Y,Ep,conf)
 
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") NonLinearDCM(a,b,c,d,scans,nr,U_long,Y,Ep,nothing)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") NonLinearDCM(a,b,c,d,scans,nr,U_long,Y,Ep,nothing)
 
     # wrong sampling rate
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
@@ -384,28 +384,30 @@ function test_Confound()
 end
 
 function test_ModelOutput()
-    Σ = [ spzeros(Float64,(2,2)) for _ in 1:4]
+    Σ = [ spzeros(Float64,(2,2)) for _ in 1:2]
 
     F = 0.0
     F_r = zeros(2)
     iter_all = ones(Int,2)
     a_all = ones(2)
     b_all = ones(2)
-    m_all = zeros(2,2)
+    m_all = ones(2,2)
     z_all = zeros(2,2) .+ 0.5
 
     # output of rigid rDCM
     @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.RigidOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,"test")
     @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.RigidOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,"test")
     @test_throws ErrorException("Invalid number of iterations") rDCM.RigidOutput(F,  F_r,zeros(Int,2),a_all,b_all,   m_all,Σ,"test")
-    @test_throws ErrorException("Inconsisten number of regions.") rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.RigidOutput(F,  F_r,iter_all,      ones(3),b_all, m_all,Σ,"test")
+    @test_throws ErrorException("One or more covariance matrices are not positive definite.") rDCM.RigidOutput(F, F_r, iter_all, a_all,b_all, m_all, [sparse([1 2; 3 4]) for _ in 1:2],"test")
 
     # output of sparse rDCM
     @test_throws ErrorException("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.") rDCM.SparseOutput(1.0,F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
     @test_throws ErrorException("Found invalid values of the posterior Gamma distribution.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,zeros(2),m_all,Σ,z_all,          "test")
     @test_throws ErrorException("Invalid number of iterations") rDCM.SparseOutput(F,  F_r,zeros(Int,2),a_all,b_all,   m_all,Σ,z_all,          "test")
     @test_throws ErrorException("Invalid probabilities in posterior Bernoulli.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,zeros(2,2) .- 1,"test")
-    @test_throws ErrorException("Inconsisten number of regions.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,Σ,z_all,          "test")
+    @test_throws ErrorException("Inconsistent number of regions.") rDCM.SparseOutput(F,  F_r,iter_all,      a_all,b_all,   m_all,[ spzeros(Float64,(2,2)) for _ in 1:3],z_all,          "test")
+    @test_throws ErrorException("One or more covariance matrices are not positive definite.") rDCM.SparseOutput(F, F_r, iter_all, a_all, b_all, m_all, [sparse([1 2;3 4]) for _ in 1:2], z_all, "test")
 end
 
 function test_RigiRdcm()
@@ -431,7 +433,7 @@ function test_RigiRdcm()
                 of the input U (u_dt). Cannot proceed.") RigidRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf)
     # wrong length of U
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") RigidRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") RigidRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf)
 
     # test outer constructors
     dcm = LinearDCM(a,c,scans,nr,U,Y,Ep,conf)
@@ -468,7 +470,7 @@ function test_SparseRdcm()
                 of the input U (u_dt). Cannot proceed.") SparseRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf,true,p0)
     # wrong length of U
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsisten.") SparseRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") SparseRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf,true,p0)
 
 end
 

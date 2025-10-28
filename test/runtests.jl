@@ -6,7 +6,7 @@ using MAT: matopen
 using Test
 using RegressionDynamicCausalModeling
 using Random
-using SparseArrays: spzeros
+using SparseArrays: spzeros, sparse
 
 @testset verbose = true "rDCM tests" begin
     @testset "Code formatting" begin

@@ -38,7 +38,7 @@ function export_to_SPM(path::String, rdcm::RigidRdcm, output::RigidOutput)
     spm_M = Dict("IS" => output.inversion, "pE" => spm_pE, "pC" => spm_pC)
 
     # error covariance
-    Ce = 1 ./ (output.a_all ./ output.b_all)
+    Ce = 1 ./ (output.α ./ output.β)
     merge!(dcm_dict, Dict("Ce" => Ce))
 
     merge!(dcm_dict, Dict("M" => spm_M))
@@ -76,10 +76,12 @@ function construct_dict(dcm::T) where {T<:DCM}
     return dcm_dict
 end
 
+"""
+    SPM_mapping(key::Symbol)
+
+Convert key name to SPM convention if it appears in the `naming_rDCM_to_SPM` dictionary.
+Otherwise return key itself.
+"""
 function SPM_mapping(key::Symbol)
-    if haskey(naming_rDCM_to_SPM, String(key))
-        return get(naming_rDCM_to_SPM, String(key), Inf)
-    else
-        return key
-    end
+    return get(naming_rDCM_to_SPM, String(key), key)
 end

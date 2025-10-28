@@ -48,7 +48,7 @@ plot(p1, y_pred[:, 1]; label="predicted signal")
 
 # Visualize the posterior mean of the A matrix
 heatmap(
-    output.m_all[:, 1:50];
+    output.μ[:, 1:50];
     yflip=true,
     title="Posterior mean A matrix",
     titlefontsize=8,
@@ -83,7 +83,7 @@ output = invert(rdcm, opt)
 
 # We can inspect the Bernoulli posterior for each connection
 heatmap(
-    output.z_all[:, 1:50];
+    output.Z[:, 1:50];
     yflip=true,
     title="Posterior over binary indicator variables",
     titlefontsize=8,
