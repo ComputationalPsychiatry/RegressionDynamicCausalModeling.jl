@@ -8,8 +8,6 @@ Generate synthetic BOLD signal timeseries based on a DCM.
 - `SNR::Real`: Signal to noise ratio
 - `TR::Real`: Sampling interval in seconds (can be omitted if dt is specified in dcm.Y)
 - `rng::AbstractRNG`: Random number generator for noise sampling.
-- `triple_input::Bool`: whether or not to triple the input (to avoid edge effects during
-convolution with HRF)
 
 # Output
 - `y_noise::Matrix{Float64}`: BOLD signal timeseries with noise
@@ -22,9 +20,7 @@ convolution with HRF)
 julia> y_noise, y, x, h = generate_BOLD(load_example_DCM();SNR=10)
 ```
 """
-function generate_BOLD(
-    dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro(), triple_input=true
-) where {T<:DCM}
+function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<:DCM}
     dcm_c = copy(dcm)
     r_dt = 1
     if isnan(TR)
@@ -53,26 +49,24 @@ function generate_BOLD(
     nr = size(dcm_c.a, 1)
 
     # allocate memory for data
-    y = zeros(N, nr)
+    y = zeros(3*N, nr)
 
     # compute fixed hemodynamic response function
     h = get_hrf(N, dcm_c.U.dt)
 
     # compute neuronal signal x
-    _, x = dcm_euler_gen(dcm_c, triple_input)
+    _, x = dcm_euler_gen(dcm_c)
+    x = [x; zeros(2*N, nr)]
+    h = [h; zeros(2*N)]
 
     # convolve neuronal signal with HRF
-    if triple_input
-        for i in 1:nr
-            tmp = ifft(fft(x[:, i]) .* fft([h; zeros(N * 3 - length(h))]))
-            y[:, i] = real(tmp[(N + 1):(2 * N)]) # need to take real part because imaginary part is not exactly zero due to numerical reasons
-        end
-    else
-        for i in 1:nr
-            y[:, i] = real(ifft(fft(x[:, i]) .* fft(h))) # need to take real part because imaginary part is not exactly zero due to numerical reasons
-        end
+    for i in 1:nr
+        y[:, i] = real(ifft(fft(x[:, i]) .* fft(h))) # need to take real part because imaginary part is not exactly zero due to numerical reasons
     end
 
+    x = x[1:N, :]
+    h = h[1:N, :]
+    y = y[1:N, :]
     # sampling
     y = y[1:r_dt:end, :]
 
@@ -88,11 +82,7 @@ function generate_BOLD(
     # add noise
     noise = randn(rng, Float64, size(y)) * diagm(vec(std(y; dims=1) ./ SNR))
 
-    if triple_input
-        return y + noise, y, x[(N + 1):(2 * N), :], h
-    else
-        return y + noise, y, x, h
-    end
+    return y + noise, y, x, h
 end
 
 """
@@ -108,7 +98,7 @@ Generate a hemodynamic response function (HRF) given a certain lenght N and samp
 - `hrf::Vector{Float64}`: Hemodynamic response function
 """
 function get_hrf(N::Int, u_dt::Float64)
-    r_dt = 1 # in matlab implementation this is effectively always one
+    r_dt = 1 # in Matlab implementation this is effectively always one
     U = zeros(N, 1)
     U[1:r_dt] .= 1
 
@@ -118,7 +108,7 @@ function get_hrf(N::Int, u_dt::Float64)
 
     dcm_hrf = LinearDCM(1, 1, N, 1, U, Y, GT)
 
-    y, _ = dcm_euler_gen(dcm_hrf, false)
+    y, _ = dcm_euler_gen(dcm_hrf)
 
     return y[1:r_dt:end, 1]
 end
