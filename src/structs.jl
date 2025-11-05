@@ -136,9 +136,9 @@ struct RigidOutput <: ModelOutput
     # inner constructor with sanity checks
     function RigidOutput(F, F_r, iter_all, α, β, μ, Σ, inversion)
         if sum(F_r) ≠ F
-            error(
-                "Sum of region-wise neg. free energies don't sum up to overall neg. free energy.",
-            )
+            #! format: off
+            error("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.")
+            #! format: on
         end
         if any(α .≤ 0.0) || any(β .≤ 0.0)
             error("Found invalid values of the posterior Gamma distribution.")
@@ -194,9 +194,9 @@ struct SparseOutput <: ModelOutput
     # inner constructor with sanity checks
     function SparseOutput(F, F_r, iter_all, α, β, μ, Σ, Z, inversion)
         if sum(F_r) ≠ F
-            error(
-                "Sum of region-wise neg. free energies don't sum up to overall neg. free energy.",
-            )
+            #! format: off
+            error("Sum of region-wise neg. free energies don't sum up to overall neg. free energy.")
+            #! format: on
         end
         if any(α .≤ 0.0) || any(β .≤ 0.0)
             error("Found invalid values of the posterior Gamma distribution.")
@@ -425,10 +425,9 @@ Base.@kwdef mutable struct LinearDCM <: DCM
                 try
                     r_dt = Int(Y.dt / U.dt)
                 catch
-                    error(
-                        "The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                  of the input U (u_dt). Cannot proceed.",
-                    )
+                    #! format: off
+                    error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                    #! format: on
                 end
                 if size(y, 1) ≠ size(U.u, 1) / r_dt
                     error("Length of BOLD signal and driving input u is inconsistent.")
@@ -501,8 +500,9 @@ Base.@kwdef mutable struct BiLinearDCM <: DCM
             try
                 r_dt = Int(Y.dt / U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
             if size(Y.y, 1) ≠ size(U.u, 1) / r_dt
                 error("Length of BOLD signal and driving input u is inconsistent.")
@@ -580,8 +580,9 @@ Base.@kwdef mutable struct NonLinearDCM <: DCM
             try
                 r_dt = Int(Y.dt / U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
             if size(Y.y, 1) ≠ size(U.u, 1) / r_dt
                 error("Length of BOLD signal and driving input u is inconsistent.")
@@ -753,8 +754,9 @@ Base.@kwdef mutable struct RigidRdcm <: RDCM
             try
                 r_dt = Int(Y.dt / U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
             if size(y, 1) ≠ size(U.u, 1) / r_dt
                 error("Length of BOLD signal and driving input u is inconsistent.")
@@ -826,8 +828,9 @@ Base.@kwdef mutable struct SparseRdcm <: RDCM
             try
                 r_dt = Int(Y.dt / U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
             if size(y, 1) ≠ size(U.u, 1) / r_dt
                 error("Length of BOLD signal and driving input u is inconsistent.")

@@ -355,8 +355,9 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
             try
                 r_dt = Int(val.Y.dt / x.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
             y = val.Y.y
             if !isnothing(y)
@@ -378,8 +379,9 @@ function Base.setproperty!(val::LinearDCM, key::Symbol, x)
             try
                 r_dt = Int(x.dt / val.U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
         end
         setfield!(val, :Y, x)
@@ -469,8 +471,9 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
         try
             r_dt = Int(val.Y.dt / x.dt)
         catch
-            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.")
+            #! format: off
+            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+            #! format: on
         end
         y = val.Y.y
         if !isnothing(y)
@@ -491,8 +494,9 @@ function Base.setproperty!(val::BiLinearDCM, key::Symbol, x)
             try
                 r_dt = Int(x.dt / val.U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
         end
         setfield!(val, :Y, x)
@@ -595,8 +599,9 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
         try
             r_dt = Int(val.Y.dt / x.dt)
         catch
-            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.")
+            #! format: off
+            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+            #! format: on
         end
         y = val.Y.y
         if !isnothing(y)
@@ -617,8 +622,9 @@ function Base.setproperty!(val::NonLinearDCM, key::Symbol, x)
             try
                 r_dt = Int(x.dt / val.U.dt)
             catch
-                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.")
+                #! format: off
+                error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+                #! format: on
             end
         end
         setfield!(val, :Y, x)

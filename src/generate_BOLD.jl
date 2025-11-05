@@ -25,8 +25,9 @@ function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<
     r_dt = 1
     if isnan(TR)
         if dcm_c.Y isa Nothing
-            error("Y field is empty. Please specify the TR of the BOLD signal manually
-            using tapas_rdcm_generate(dcm;TR=value)")
+            #! format: off
+            error("Y field is empty. Please specify the TR of the BOLD signal manually using tapas_rdcm_generate(dcm;TR=value)")
+            #! format: on
         else
             r_dt = Int64(dcm_c.Y.dt / dcm_c.U.dt)
         end
@@ -40,8 +41,9 @@ function generate_BOLD(dcm::T; SNR::Real, TR::Real=NaN, rng=Xoshiro()) where {T<
                 @warn "Overwriting sampling time of Y with TR."
             end
         catch
-            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.")
+            #! format: off
+            error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+            #! format: on
         end
     end
 

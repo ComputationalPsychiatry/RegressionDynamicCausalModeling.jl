@@ -157,12 +157,10 @@ function test_LinearDCM()
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.051)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.051)
     @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(3,3)),BitArray(ones(3,4)))
     @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamLinear(BitArray(ones(2,2)),BitArray(ones(2,4)))
 
@@ -223,12 +221,10 @@ function test_BiLinearDCM()
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
     @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)))
     @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamBiLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)))
 
@@ -243,8 +239,7 @@ function test_BiLinearDCM()
 
     # wrong sampling rate
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") BiLinearDCM(a,b,c,scans,nr,U_wrong_dt,Y,Ep,nothing)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") BiLinearDCM(a,b,c,scans,nr,U_wrong_dt,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -285,12 +280,10 @@ function test_NonLinearDCM()
     @test_throws ErrorException("Number of scans does not match.") dcm.scans = 120
     @test_throws ErrorException("Number of inputs does not match.") dcm.U = InputU(zeros(scans*16,4),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") dcm.U = InputU(zeros(scans*16+1,nu),0.03125)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-            of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.U = InputU(zeros(scans*16,nu),0.03)
     @test_throws ErrorException("Number of regions does not match.") dcm.Y = BoldY(zeros(scans,3),0.5)
     @test_throws ErrorException("Number of scans does not match.") dcm.Y = BoldY(zeros(scans+1,2),0.5)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") dcm.Y = BoldY(zeros(scans,2),0.51)
     @test_throws ErrorException("Number of regions does not match.") dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(3,3)),BitArray(zeros(3,3,4)),BitMatrix(ones(3,4)),BitArray(zeros(3,3,3)))
     @test_throws ErrorException("Number of inputs does not match.") dcm.Ep = rDCM.TrueParamNonLinear(BitMatrix(ones(2,2)),BitArray(zeros(2,2,4)),BitMatrix(ones(2,4)),BitArray(zeros(2,2,2)))
 
@@ -305,8 +298,7 @@ function test_NonLinearDCM()
 
     # wrong sampling rate
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") NonLinearDCM(a,b,c,d,scans,nr,U_wrong_dt,Y,Ep,nothing)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") NonLinearDCM(a,b,c,d,scans,nr,U_wrong_dt,Y,Ep,nothing)
 
     # test setter function
     dcm.a = BitMatrix(zeros(2,2))
@@ -429,8 +421,7 @@ function test_RigiRdcm()
 
     # wrong sampling rate of U
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") RigidRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") RigidRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf)
     # wrong length of U
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") RigidRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf)
@@ -466,8 +457,7 @@ function test_SparseRdcm()
     @test_throws ErrorException("Number of inputs don't match.") SparseRdcm(a,BitMatrix(ones(2,4)),scans,nr,U,Y,Ep,conf,hrf,true,p0)
     @test_throws ErrorException("p0 is not a proper Bernoulli parameter.") SparseRdcm(a,c,scans,nr,U,Y,Ep,conf,hrf,true,1.5)
     U_wrong_dt = InputU(zeros(scans*16,nu),0.03)
-    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate
-                of the input U (u_dt). Cannot proceed.") SparseRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf,true,p0)
+    @test_throws ErrorException("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.") SparseRdcm(a,c,scans,nr,U_wrong_dt,Y,Ep,conf,hrf,true,p0)
     # wrong length of U
     U_long = InputU(zeros(scans*16+1,nu),0.03125)
     @test_throws ErrorException("Length of BOLD signal and driving input u is inconsistent.") SparseRdcm(a,c,scans,nr,U_long,Y,Ep,conf,hrf,true,p0)
