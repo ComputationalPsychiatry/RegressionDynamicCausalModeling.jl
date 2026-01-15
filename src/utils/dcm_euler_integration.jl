@@ -1,23 +1,18 @@
 
 """
-    dcm_euler_gen(dcm,triple_input)
+    dcm_euler_gen(dcm)
 
 Performs DCM Euler integration by preparing necessary hemodynamic constants and DCM matrices
 and calls the Euler integration function.
 
 # Arguments
 - `dcm::DCM`: DCM structure (can be a linear, bilinear on nonlinear DCM)
-- `triple_input::Bool`: whether or not to triple the input (to avoid unwanted effects during
-convolution with HRF)
 
 # Output
 - `y`: BOLD signal
 - `x`: neuronal signal
 """
-function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
-    # if !isfile(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
-    #     @info "Binary file for Euler integration not found. Using Julia to generate data."
-    # end
+function dcm_euler_gen(dcm::T) where {T<:DCM}
 
     # number of regions
     nr = size(dcm.a, 1)
@@ -27,13 +22,8 @@ function dcm_euler_gen(dcm::T, triple_input::Bool) where {T<:DCM}
     B, D = get_matrices(dcm)
 
     # driving inputs
-    if triple_input
-        u = [dcm.U.u; dcm.U.u; dcm.U.u]
-    else
-        u = copy(dcm.U.u)
-    end
-    C = u * (dcm.Ep.C' ./ 16)
-    U = u
+    C = dcm.U.u * (dcm.Ep.C' ./ 16)
+    U = copy(dcm.U.u)
 
     # hemodynamic constants
     H = [0.64, 0.32, 2.00, 0.32, 0.32]

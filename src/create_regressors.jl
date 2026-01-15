@@ -48,9 +48,9 @@ function create_regressors_core(
     try
         r_dt = Int64(y_dt / u_dt)
     catch
-        error(
-            "The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.",
-        )
+        #! format: off
+        error("The sampling rate of Y (y_dt) is not a multiple of the sampling rate of the input U (u_dt). Cannot proceed.")
+        #! format: on
     end
 
     Nu, nu = size(u) #input length and number of inputs
