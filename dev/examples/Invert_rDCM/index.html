@@ -35,20 +35,20 @@ Ep (True parameters)
     ylabel=&quot;region to&quot;,
     aspect_ratio=1,
     size=(350, 350),
-)</code></pre><img src="8305a715.svg" alt="Example block output"/><p>We can use the DCM to generate synthetic data</p><pre><code class="language-julia hljs">y_noise, _, _, _ = generate_BOLD(dcm; SNR=3, rng=MersenneTwister(42));
+)</code></pre><img src="aaffb7ff.svg" alt="Example block output"/><p>We can use the DCM to generate synthetic data</p><pre><code class="language-julia hljs">y_noise, _, _, _ = generate_BOLD(dcm; SNR=3, rng=MersenneTwister(42));
 dcm.Y.y = y_noise # save BOLD signal in DCM
-p1 = plot(dcm.Y.y[:, 1]; label=&quot;true signal&quot;, title=&quot;BOLD signal of region 1&quot;)</code></pre><img src="917773c6.svg" alt="Example block output"/><p>Specify options/hyperparameters for inversion</p><pre><code class="language-julia hljs">opt = Options(RigidInversionParams(); synthetic=true, rng=MersenneTwister(42))
+p1 = plot(dcm.Y.y[:, 1]; label=&quot;true signal&quot;, title=&quot;BOLD signal of region 1&quot;)</code></pre><img src="f8cc5bc4.svg" alt="Example block output"/><p>Specify options/hyperparameters for inversion</p><pre><code class="language-julia hljs">opt = Options(RigidInversionParams(); synthetic=true, rng=MersenneTwister(42))
 
 rdcm = RigidRdcm(dcm) # convert the DCM to a rDCM model</code></pre><p>Estimate connectivity</p><pre><code class="language-julia hljs">output = invert(rdcm, opt)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">rigid rDCM output
-    F:   -574988.69
-    F_r: -14474.90 ... -8427.91
+    F:   -574988.98
+    F_r: -14475.08 ... -8427.91
     iterations until convergence per region: 4 ... 5
     Posteriors:
         α: 1359.00,...,1359.00
-        β: 3308875.41,...,36960.51
+        β: 3309306.47,...,36960.51
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices</code></pre><p>Based on the estimated parameters we can predict the BOLD signal and compare it to the ground truth</p><pre><code class="language-julia hljs">y_pred = predict(rdcm, output)
-plot(p1, y_pred[:, 1]; label=&quot;predicted signal&quot;)</code></pre><img src="5f218706.svg" alt="Example block output"/><p>Visualize the posterior mean of the A matrix</p><pre><code class="language-julia hljs">heatmap(
+plot(p1, y_pred[:, 1]; label=&quot;predicted signal&quot;)</code></pre><img src="faadffdd.svg" alt="Example block output"/><p>Visualize the posterior mean of the A matrix</p><pre><code class="language-julia hljs">heatmap(
     output.μ[:, 1:50];
     yflip=true,
     title=&quot;Posterior mean A matrix&quot;,
@@ -57,19 +57,19 @@ plot(p1, y_pred[:, 1]; label=&quot;predicted signal&quot;)</code></pre><img src=
     ylabel=&quot;region to&quot;,
     aspect_ratio=1,
     size=(350, 350),
-)</code></pre><img src="8bef8dbe.svg" alt="Example block output"/><h2 id="sparse-rDCM"><a class="docs-heading-anchor" href="#sparse-rDCM">sparse rDCM</a><a id="sparse-rDCM-1"></a><a class="docs-heading-anchor-permalink" href="#sparse-rDCM" title="Permalink"></a></h2><p>We load again the example DCM and generate BOLD signal with an SNR of 3.</p><pre><code class="language-julia hljs">dcm = load_example_DCM()
+)</code></pre><img src="ff937d75.svg" alt="Example block output"/><h2 id="sparse-rDCM"><a class="docs-heading-anchor" href="#sparse-rDCM">sparse rDCM</a><a id="sparse-rDCM-1"></a><a class="docs-heading-anchor-permalink" href="#sparse-rDCM" title="Permalink"></a></h2><p>We load again the example DCM and generate BOLD signal with an SNR of 3.</p><pre><code class="language-julia hljs">dcm = load_example_DCM()
 y_noise, _, _, _ = generate_BOLD(dcm; SNR=3, rng=MersenneTwister(42));
 dcm.Y.y = y_noise;</code></pre><p>Convert the linear DCM to a sparse rDCM model with a Bernoulli prior of 0.15 (a priori belief about network sparsity). This means we assume that the a priori probability of a connection being present is low.</p><pre><code class="language-julia hljs">rdcm = SparseRdcm(dcm; p0=0.15)</code></pre><p>Specify options/hyperparameters for inversion</p><pre><code class="language-julia hljs">opt = Options(
     SparseInversionParams(; reruns=100, restrictInputs=true);
     synthetic=true,
     rng=MersenneTwister(42),
 )</code></pre><p>Invert the model</p><pre><code class="language-julia hljs">output = invert(rdcm, opt)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">sparse rDCM output
-    F:   -572101.37
-    F_r: -14436.11 ... -8377.39
-    iterations until convergence per region: 9 ... 7
+    F:   -572093.16
+    F_r: -14437.88 ... -8377.39
+    iterations until convergence per region: 8 ... 10
     Posteriors:
         α: 1359.00,...,1359.00
-        β: 3167112.30,...,34529.65
+        β: 3152031.87,...,34529.65
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices
         Z: 50 x 75 matrix</code></pre><p>We can inspect the Bernoulli posterior for each connection</p><pre><code class="language-julia hljs">heatmap(
@@ -81,4 +81,4 @@ dcm.Y.y = y_noise;</code></pre><p>Convert the linear DCM to a sparse rDCM model 
     ylabel=&quot;region to&quot;,
     aspect_ratio=1,
     size=(350, 350),
-)</code></pre><img src="485ca464.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Specify_DCM/">« Construct DCM</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Wednesday 14 January 2026 15:39">Wednesday 14 January 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+)</code></pre><img src="ed6a7f0d.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../Specify_DCM/">« Construct DCM</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Thursday 15 January 2026 09:40">Thursday 15 January 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
