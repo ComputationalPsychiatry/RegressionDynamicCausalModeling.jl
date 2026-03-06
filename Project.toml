@@ -1,7 +1,7 @@
 name = "RegressionDynamicCausalModeling"
 uuid = "4fb452e6-e726-4794-90dc-adda47b23488"
-authors = ["ImreKertesz <ikertesz@biomed.ee.ethz.ch>"]
 version = "0.2.1"
+authors = ["ImreKertesz <ikertesz@biomed.ee.ethz.ch>"]
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -27,7 +27,7 @@ DocStringExtensions = "0.9"
 FFTW = "1.7.2"
 LazyArtifacts = "1"
 LinearAlgebra = "1"
-MAT = "0.10"
+MAT = "0.10, 0.11"
 Pkg = "1"
 PrecompileTools = "1.2"
 Printf = "1"
