@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------------------------------------
 
 function sparse_inversion(
-    rdcm::SparseRdcm, X_c::Matrix{ComplexF64}, Y_c::Matrix{ComplexF64}, opt::Options
+    rdcm::SparseRdcm, X::Matrix{Float64}, Y::Matrix{Float64}, opt::Options
 )
     dcm = copy(rdcm) # todo: check again why we do this
 
@@ -13,19 +13,7 @@ function sparse_inversion(
     pr = opt.invParams.tol
     reruns = opt.invParams.reruns
 
-    nr = size(Y_c, 2)
-
-    # TODO: might make sense to put this part into create regressors
-    # split data into real and imaginary part
-    if iseven(size(Y_c, 1))
-        # don't need the imaginary part of the constant and nyquist frequency because it's zero
-        Y = [real(Y_c); imag(Y_c)[2:(end - 1), :]]
-        X = [real(X_c); imag(X_c)[2:(end - 1), :]]
-    else
-        # if size of Y is odd there is no nyquist frequency, so only cut away the imaginary part of const. frequency
-        Y = [real(Y_c); imag(Y_c)[2:end, :]]
-        X = [real(X_c); imag(X_c)[2:end, :]]
-    end
+    nr = size(Y, 2)
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
     nc = size(dcm.Conf.X0, 2)

@@ -419,13 +419,23 @@ function test_print_RigidOutput(rdcm)
 
     output = invert(rdcm,opt)
 
+    # old result from freq domain
+#ref_rigidOut = "rigid rDCM output
+#    F:   75495.97
+#    F_r: -838.83 ... 3644.24
+#    iterations until convergence per region: 4 ... 4
+#    Posteriors:
+#        α: 1359.00,...,1359.00
+#        β: 144.43,...,5.40
+#        μ: 50 x 75 matrix
+#        Σ: 50 element vector of matrices"
 ref_rigidOut = "rigid rDCM output
-    F:   75495.97
-    F_r: -838.83 ... 3644.24
+    F:   293586.24
+    F_r: 5794.96 ... 5928.89
     iterations until convergence per region: 4 ... 4
     Posteriors:
-        α: 1359.00,...,1359.00
-        β: 144.43,...,5.40
+        α: 1358.50,...,1358.50
+        β: 1.09,...,1.00
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices"
 
@@ -445,17 +455,26 @@ function test_print_SparseOutput(rdcm)
 
     out = invert(rdcm,opt)
 
+#ref_sparseOutput = "sparse rDCM output
+#    F:   42833.52
+#    F_r: -445.39 ... 3644.24
+#    iterations until convergence per region: 6 ... 5
+#    Posteriors:
+#        α: 1359.00,...,1359.00
+#        β: 102.98,...,5.40
+#        μ: 50 x 75 matrix
+#        Σ: 50 element vector of matrices
+#        Z: 50 x 75 matrix"
 ref_sparseOutput = "sparse rDCM output
-    F:   42833.52
-    F_r: -445.39 ... 3644.24
-    iterations until convergence per region: 6 ... 5
+    F:   282961.48
+    F_r: 5793.27 ... 5933.48
+    iterations until convergence per region: 7 ... 4
     Posteriors:
-        α: 1359.00,...,1359.00
-        β: 102.98,...,5.40
+        α: 1358.50,...,1358.50
+        β: 1.09,...,1.00
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices
         Z: 50 x 75 matrix"
-
 
     io = IOBuffer()
     show(IOContext(io, :limit => true, :displaysize => (30, 50)), "text/plain", out)
@@ -514,9 +533,13 @@ function test_spm_compat(dcm)
 
     dcm2 = load_DCM(dcm_path;verbose=false)
 
-    A_ref = [-0.41548922171677133 0.3949738877798173 0.0;
-        0.0 -0.5238266884300515 -0.2711682814395596;
-        0.0 0.0 -0.46454372168894786]
+    # freq domain result
+    #A_ref = [-0.41548922171677133 0.3949738877798173 0.0;
+    #    0.0 -0.5238266884300515 -0.2711682814395596;
+    #    0.0 0.0 -0.46454372168894786]
+    A_ref = [-0.41768519062272663 0.3955604501206548 0.0;
+        0.0 -0.5262360619087124 -0.27114872537758833;
+        0.0 0.0 -0.4678188647751787]
 
     @test all(A_ref .≈ dcm2.Ep.A[1:3,1:3])
 

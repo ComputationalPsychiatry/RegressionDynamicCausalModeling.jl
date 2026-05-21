@@ -1,32 +1,11 @@
-
-#------------------------------------------------------------------------------------------------------------
-# version which only looks at positive frequencies and also splits data into real and imaginary part
-# this is the most efficient one and also correct one
-# -----------------------------------------------------------------------------------------------------------
-
 function rigid_inversion(
-    rdcm::RigidRdcm, X_c::Matrix{ComplexF64}, Y_c::Matrix{ComplexF64}, opt::Options
+    rdcm::RigidRdcm, X::Matrix{Float64}, Y::Matrix{Float64}, opt::Options
 )
     dcm = copy(rdcm) #TODO: maybe there is more elegant way where no copy is needed
     maxIter = opt.invParams.maxIter
     pr = opt.invParams.tol^2
 
-    # TODO: might make sense to put this part into create regressors
-    # split data into real and imaginary part
-    if iseven(size(Y_c, 1))
-        # don't need the imaginary part of the constant and nyquist frequency because it's zero
-        Y = [real(Y_c); imag(Y_c)[2:(end - 1), :]]
-        X = [real(X_c); imag(X_c)[2:(end - 1), :]]
-    else
-        # if size of Y is odd there is no nyquist frequency, so only cut away the imaginary part of const. frequency
-        Y = [real(Y_c); imag(Y_c)[2:end, :]]
-        X = [real(X_c); imag(X_c)[2:end, :]]
-    end
-
     nr = size(Y, 2)
-    #Ny, nr = size(Y)
-
-    #const_freq = X_c[1,1:nr]
 
     # no baseline regressor for simulations, TODO: put this also in create regressor function
     nc = size(dcm.Conf.X0, 2)
@@ -35,9 +14,6 @@ function rigid_inversion(
     else
         conf_weight_idx = BitMatrix(ones(nr, nc))
     end
-    #if opt.synthetic
-    #    dcm.c[:, (end - nc + 1):end] .= false
-    #end
 
     idx = [dcm.a dcm.c conf_weight_idx]
 
