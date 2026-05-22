@@ -1,9 +1,3 @@
-
-#------------------------------------------------------------------------------------------------------------
-# version which only looks at positive frequencies and also splits data into real and imaginary part
-# this is the most efficient one and also correct one
-# -----------------------------------------------------------------------------------------------------------
-
 function sparse_inversion(
     rdcm::SparseRdcm, X::Matrix{Float64}, Y::Matrix{Float64}, opt::Options
 )
@@ -41,6 +35,16 @@ function sparse_inversion(
     Σ_all = [spzeros(Float64, (D, D)) for _ in 1:nr]
     z_all = zeros(Float64, nr, D)
 
+    N_eff = size(Y, 1)
+    Λ_noise = I(N_eff)
+    log_det_Λ_noise = 0.0
+
+    if rdcm.Y.dt < 2.0
+        Λ_noise = get_precision_component(N_eff, rdcm.Y.dt, -0.5)
+        Λ_noise[Λ_noise .< 1e-3] .= 0.0
+        log_det_Λ_noise = logdet(Λ_noise)
+    end
+
     # iterate over regions
     prog = Progress(nr; enabled=(!opt.testing))
     for r in 1:nr
@@ -56,12 +60,8 @@ function sparse_inversion(
         F_r_iter = zeros(reruns)
 
         # remove unnecessary data points
-        idx_y = .!isnan.(Y[:, r])
-        X_r = X[idx_y, :]
-        Y_r = Y[idx_y, r]
-
-        # effective number of data points
-        N_eff = sum(idx_y)
+        X_r = X[:, :]
+        Y_r = Y[:, r]
 
         # prior precision matrix
         l0_r = diagm(l0[r, :])
@@ -98,8 +98,8 @@ function sparse_inversion(
 
         # precompute certain quantities:
         # estimate variables X'X and X'Y per region
-        W = X_r' * X_r
-        V = X_r' * Y_r
+        W = X_r' * Λ_noise * X_r
+        V = X_r' * Λ_noise * Y_r
 
         for iter in 1:reruns # Matlab version starts this loop earlier but not necessary (quantities above are constant across iterations)
             # initialise z_r, τ_r and a_r per region
@@ -123,7 +123,23 @@ function sparse_inversion(
             # convergence loop
             for i in 1:maxIter
                 b_r, QF, τ_r = update_posterior_sparse!(
-                    μ_r, Σ_r, a_r, τ_r, W, l0_r, μ0_r, V, Y_r, b0, z_r, p0, Z, G, D, opt
+                    μ_r,
+                    Σ_r,
+                    a_r,
+                    τ_r,
+                    W,
+                    l0_r,
+                    μ0_r,
+                    V,
+                    Y_r,
+                    b0,
+                    z_r,
+                    p0,
+                    Z,
+                    G,
+                    D,
+                    opt,
+                    Λ_noise,
                 )
 
                 # check for sparsity (because of small values)
@@ -149,6 +165,7 @@ function sparse_inversion(
                     z_r,
                     z_idx,
                     p0,
+                    log_det_Λ_noise,
                 )
 
                 # check for convergence
@@ -172,7 +189,22 @@ function sparse_inversion(
             z_idx .= (z_r .> pr^2) .& (z_r .< 1.0) .> 0
 
             F_r_iter[iter] = compute_F_sparse(
-                N_eff, a_r, b_r, QF, τ_r, l0_r, μ_r, μ0_r, Σ_r, a0, b0, D, z_r, z_idx, p0
+                N_eff,
+                a_r,
+                b_r,
+                QF,
+                τ_r,
+                l0_r,
+                μ_r,
+                μ0_r,
+                Σ_r,
+                a0,
+                b0,
+                D,
+                z_r,
+                z_idx,
+                p0,
+                log_det_Λ_noise,
             )
 
             # assign iteration-specific values
@@ -227,10 +259,11 @@ function update_posterior_sparse!(
     G::Matrix{Float64},
     D::Int,
     opt::Options,
+    Λ_noise,
 )
 
     # update posterior covariance matrix
-    Σ_r .= inv(Hermitian(τ_r * G + l0_r)) # TODO: change Hermitian to Symmetric in time domain formulation
+    Σ_r .= inv(Symmetric(τ_r * G + l0_r))
 
     # update posterior mean
     μ_r .= Σ_r * (τ_r * Z * V + l0_r * μ0_r)
@@ -268,7 +301,7 @@ function update_posterior_sparse!(
     G[diagind(G)] .= z_r .* diag(W)
 
     # update posterior rate parameter
-    QF = (Y_r' * Y_r - μ_r' * Z * V * 2.0 + μ_r' * G * μ_r + tr(G * Σ_r)) * 0.5
+    QF = (Y_r' * Λ_noise * Y_r - μ_r' * Z * V * 2.0 + μ_r' * G * μ_r + tr(G * Σ_r)) * 0.5
     b_r = b0 + QF
 
     # update posterior mean of Gamma distribution
@@ -293,10 +326,13 @@ function compute_F_sparse(
     z_r::Vector{Float64},
     z_idx::BitVector,
     p0::Vector{Float64},
+    log_det_Λ_noise::Float64,
 )
 
     # compute components of negative free energy
-    log_lik = 0.5 * (N_eff * (digamma(a_r) - log(b_r)) - N_eff * log(2π)) - τ_r * QF # TODO: In Matlab version QF is multiplied with 0.5 -> that's wrong because QF was already multiplied by 0.5
+    log_lik =
+        0.5 * (N_eff * (digamma(a_r) - log(b_r)) - N_eff * log(2π)) - τ_r * QF +
+        0.5*log_det_Λ_noise # TODO: In Matlab version QF is multiplied with 0.5 -> that's wrong because QF was already multiplied by 0.5
     log_p_weight =
         0.5 * (
             logdet(l0_r) - dim_r * log(2π) - (μ_r - μ0_r)' * l0_r * (μ_r - μ0_r) -

@@ -429,13 +429,25 @@ function test_print_RigidOutput(rdcm)
 #        β: 144.43,...,5.40
 #        μ: 50 x 75 matrix
 #        Σ: 50 element vector of matrices"
+    # time domain
+# ref_rigidOut = "rigid rDCM output
+#     F:   293586.24
+#     F_r: 5794.96 ... 5928.89
+#     iterations until convergence per region: 4 ... 4
+#     Posteriors:
+#         α: 1358.50,...,1358.50
+#         β: 1.09,...,1.00
+#         μ: 50 x 75 matrix
+#         Σ: 50 element vector of matrices"
+
+    # time domain with noise
 ref_rigidOut = "rigid rDCM output
-    F:   293586.24
-    F_r: 5794.96 ... 5928.89
+    F:   173426.14
+    F_r: 3378.17 ... 3533.32
     iterations until convergence per region: 4 ... 4
     Posteriors:
         α: 1358.50,...,1358.50
-        β: 1.09,...,1.00
+        β: 1.11,...,1.00
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices"
 
@@ -455,6 +467,7 @@ function test_print_SparseOutput(rdcm)
 
     out = invert(rdcm,opt)
 
+    # freq domain
 #ref_sparseOutput = "sparse rDCM output
 #    F:   42833.52
 #    F_r: -445.39 ... 3644.24
@@ -465,13 +478,25 @@ function test_print_SparseOutput(rdcm)
 #        μ: 50 x 75 matrix
 #        Σ: 50 element vector of matrices
 #        Z: 50 x 75 matrix"
+    # time domain
+# ref_sparseOutput = "sparse rDCM output
+#     F:   282961.48
+#     F_r: 5793.27 ... 5933.48
+#     iterations until convergence per region: 7 ... 4
+#     Posteriors:
+#         α: 1358.50,...,1358.50
+#         β: 1.09,...,1.00
+#         μ: 50 x 75 matrix
+#         Σ: 50 element vector of matrices
+#         Z: 50 x 75 matrix"
+    # time domain with noise
 ref_sparseOutput = "sparse rDCM output
-    F:   282961.48
-    F_r: 5793.27 ... 5933.48
-    iterations until convergence per region: 7 ... 4
+    F:   155574.93
+    F_r: 3380.47 ... 3538.02
+    iterations until convergence per region: 8 ... 4
     Posteriors:
         α: 1358.50,...,1358.50
-        β: 1.09,...,1.00
+        β: 1.10,...,1.00
         μ: 50 x 75 matrix
         Σ: 50 element vector of matrices
         Z: 50 x 75 matrix"
@@ -534,12 +559,23 @@ function test_spm_compat(dcm)
     dcm2 = load_DCM(dcm_path;verbose=false)
 
     # freq domain result
-    #A_ref = [-0.41548922171677133 0.3949738877798173 0.0;
-    #    0.0 -0.5238266884300515 -0.2711682814395596;
-    #    0.0 0.0 -0.46454372168894786]
-    A_ref = [-0.41768519062272663 0.3955604501206548 0.0;
-        0.0 -0.5262360619087124 -0.27114872537758833;
-        0.0 0.0 -0.4678188647751787]
+    # A_ref = [
+    #     -0.41548922171677133 0.3949738877798173 0.0;
+    #     0.0 -0.5238266884300515 -0.2711682814395596;
+    #     0.0 0.0 -0.46454372168894786
+    # ]
+    # time domain
+    # A_ref = [
+    #     -0.41768519062272663 0.3955604501206548 0.0;
+    #     0.0 -0.5262360619087124 -0.27114872537758833;
+    #     0.0 0.0 -0.4678188647751787
+    # ]
+    # time domain with noise
+    A_ref = [
+        -0.41762364720395406 0.3955882118639011 0.0;
+        0.0 -0.5261608899995542 -0.2711592322616115;
+        0.0 0.0 -0.4677325502216988
+    ]
 
     @test all(A_ref .≈ dcm2.Ep.A[1:3,1:3])
 
@@ -570,8 +606,23 @@ function test_spm_compat(dcm)
     @test haskey(DCM_mat["M"], "pC")
 end
 
+function test_precision_component()
+    Λ_ref = [
+        0.16993302591128678 0.10718599033816424 0.06587615283267456 0.037741545893719794 0.017155248133508997;
+        0.10718599033816424 0.23580917874396135 0.14492753623188404 0.08303140096618356 0.037741545893719794;
+        0.06587615283267456 0.14492753623188404 0.25296442687747034 0.14492753623188404 0.06587615283267455;
+        0.0377415458937198 0.08303140096618356 0.14492753623188404 0.2358091787439613 0.10718599033816423;
+        0.017155248133509 0.037741545893719794 0.06587615283267456 0.10718599033816421 0.16993302591128678
+    ]
+
+    Λ = rDCM.get_precision_component(5, 0.5, -0.5)
+
+    @test all(Λ_ref .≈ Λ)
+end
+
 function testUtils()
     @testset verbose=true "Utils" begin
+        test_precision_component()
 
         dcm = load_example_DCM()
 

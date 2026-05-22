@@ -27,16 +27,23 @@ function rigid_inversion(
     Σ_all = [spzeros(Float64, (size(idx, 2), size(idx, 2))) for _ in 1:nr]
     iter_all = ones(Int, nr)
 
+    N_eff = size(Y, 1)
+    Λ_noise = I(N_eff)
+    log_det_Λ_noise = 0.0
+
+    if rdcm.Y.dt < 2.0
+        Λ_noise = get_precision_component(N_eff, rdcm.Y.dt, -0.5)
+        Λ_noise[Λ_noise .< 1e-3] .= 0.0
+        log_det_Λ_noise = logdet(Λ_noise)
+    end
+
     prog = Progress(nr; enabled=(!opt.testing))
     for r in 1:nr
-        idx_y = .!isnan.(Y[:, r])
         idx_r = idx[r, :]
 
-        N_eff = sum(idx_y)
-
         # remove unnecessary dimensions
-        Xᵣ = X[idx_y, idx_r]
-        Yᵣ = Y[idx_y, r]
+        Xᵣ = X[:, idx_r]
+        Yᵣ = Y[:, r]
 
         # effective dimensionality
         dim_r = sum(idx_r)
@@ -48,8 +55,8 @@ function rigid_inversion(
         μ0ᵣ = μ0[r, idx_r]
 
         # precompute X'X and X'Y
-        W = Xᵣ' * Xᵣ
-        V = Xᵣ' * Yᵣ
+        W = Xᵣ' * Λ_noise * Xᵣ
+        V = Xᵣ' * Λ_noise * Yᵣ
 
         # initialise posterior mean of gamma distribution
         τ = a0 / β0
@@ -67,9 +74,13 @@ function rigid_inversion(
         Σᵣ = zeros(size(l0ᵣ))
 
         for i in 1:maxIter
-            βᵣ, QF, τ = update_posterior_rigid!(μᵣ, Σᵣ, aᵣ, τ, W, l0ᵣ, μ0ᵣ, V, Yᵣ, Xᵣ, β0)
+            βᵣ, QF, τ = update_posterior_rigid!(
+                μᵣ, Σᵣ, aᵣ, τ, W, l0ᵣ, μ0ᵣ, V, Yᵣ, Xᵣ, β0, Λ_noise
+            )
 
-            Fᵣ = compute_F(N_eff, aᵣ, βᵣ, QF, τ, l0ᵣ, μᵣ, μ0ᵣ, Σᵣ, a0, β0, dim_r)
+            Fᵣ = compute_F(
+                N_eff, aᵣ, βᵣ, QF, τ, l0ᵣ, μᵣ, μ0ᵣ, Σᵣ, a0, β0, dim_r, log_det_Λ_noise
+            )
 
             # check for convergence
             if (F_old - Fᵣ)^2 < pr
@@ -121,17 +132,17 @@ function update_posterior_rigid!(
     Yᵣ::Vector{Float64},
     Xᵣ::Matrix{Float64},
     β0::Float64,
+    Λ_noise,
 )
 
-    # update posterior covariance matrix, Hermitian ensures that matrix inverse is symmetric
-    Σᵣ .= inv(Hermitian(τᵣ * W + l0ᵣ)) # TODO: change Hermitian to Symmetric in time domain formulation
+    # update posterior covariance matrix, Symmetric ensures that matrix inverse is symmetric
+    Σᵣ .= inv(Symmetric(τᵣ * W + l0ᵣ))
 
     # update posterior mean
     μᵣ .= Σᵣ * (τᵣ * V + l0ᵣ * μ0ᵣ)
 
     # update posterior rate parameter
-    QF = ((Yᵣ - Xᵣ * μᵣ)' * (Yᵣ - Xᵣ * μᵣ) + tr(Xᵣ' * Xᵣ * Σᵣ)) * 0.5
-    #QF = (Yᵣ'*Yᵣ - 2μᵣ'*V + μᵣ'*W*μᵣ + tr(W*Σᵣ))*0.5 # TODO: this line is probably more efficient
+    QF = ((Yᵣ - Xᵣ * μᵣ)' * Λ_noise * (Yᵣ - Xᵣ * μᵣ) + tr(W * Σᵣ)) * 0.5
     βᵣ = β0 + QF
 
     # update posterior mean of Gamma distribution
@@ -152,10 +163,13 @@ function compute_F(
     a0::Float64,
     β0::Float64,
     dimᵣ::Int,
+    log_det_Λ_noise::Float64,
 )
 
     # compute components of negative free energy
-    log_lik = 0.5 * (N_eff * (digamma(aᵣ) - log(βᵣ)) - N_eff * log(2π)) - QF * τᵣ
+    log_lik =
+        0.5 * (N_eff * (digamma(aᵣ) - log(βᵣ)) - N_eff * log(2π)) - QF * τᵣ +
+        0.5*log_det_Λ_noise
     log_p_weight =
         0.5 * (logdet(l0ᵣ) - dimᵣ * log(2π) - (μᵣ - μ0ᵣ)' * l0ᵣ * (μᵣ - μ0ᵣ) - tr(l0ᵣ * Σᵣ)) #TODO: check if logdet is the most efficient way and also doesn't give the same results for not positive define matrices as matlab
     log_p_prec =

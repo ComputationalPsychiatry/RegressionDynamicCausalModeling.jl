@@ -13,7 +13,8 @@ const rDCM = RegressionDynamicCausalModeling
 using Distributions
 using DocStringExtensions
 using FFTW: rfft, irfft, fft, ifft
-using LinearAlgebra: tr, inv, logdet, diagm, diag, I, diagind, eigvals, isposdef, Hermitian
+using LinearAlgebra:
+    tr, inv, logdet, diagm, diag, I, diagind, eigvals, isposdef, Symmetric, SymTridiagonal
 using MAT: matopen, matwrite
 using LazyArtifacts
 using PrecompileTools: @compile_workload, @setup_workload
@@ -53,6 +54,7 @@ include("utils/load_DCM.jl")
 include("utils/dcm_euler_integration.jl")
 include("utils/dcm_print.jl")
 include("utils/SPM_compat.jl")
+include("utils/noise.jl")
 include("generate_BOLD.jl")
 include("get_priors.jl")
 include("rigid_inversion.jl")
