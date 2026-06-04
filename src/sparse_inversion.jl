@@ -1,6 +1,4 @@
-function sparse_inversion(
-    rdcm::SparseRdcm, X::Matrix{Float64}, Y::Matrix{Float64}, opt::Options
-)
+function sparse_inversion(rdcm::SparseRdcm, X::Matrix, Y::Matrix, opt::Options)
     dcm = copy(rdcm) # todo: check again why we do this
 
     maxIter = opt.invParams.maxIter
@@ -60,21 +58,21 @@ function sparse_inversion(
         F_r_iter = zeros(reruns)
 
         # remove unnecessary data points
-        X_r = X[:, :]
-        Y_r = Y[:, r]
+        @views X_r = X[:, :]
+        @views Y_r = Y[:, r]
 
         # prior precision matrix
-        l0_r = diagm(l0[r, :])
+        @views l0_r = diagm(l0[r, :])
 
         # prior mean for connectivity
-        μ0_r = μ0[r, :]
+        @views μ0_r = μ0[r, :]
 
         # set p0 (Bernoulli prior)
         p0 = ones(D) * dcm.p0
 
         # inform p0 (e.g., by anatomical information)
         if dcm.inform_p0
-            p0[1:nr] .*= dcm.a[r, :]
+            @views p0[1:nr] .*= dcm.a[r, :]
         end
 
         # ensure self-connectivity
@@ -89,7 +87,7 @@ function sparse_inversion(
 
         # make sure that driving inputs are only on correct connections
         if opt.invParams.restrictInputs
-            p0[(nr + 1):(end - nc)] = dcm.c[r, :]
+            @views p0[(nr + 1):(end - nc)] = dcm.c[r, :]
         end
 
         # allocate memory
@@ -243,20 +241,20 @@ function sparse_inversion(
 end
 
 function update_posterior_sparse!(
-    μ_r::Vector{Float64},
-    Σ_r::Matrix{Float64},
+    μ_r::Vector,
+    Σ_r::Matrix,
     a_r::Float64,
     τ_r::Float64,
-    W::Matrix{Float64},
-    l0_r::Matrix{Float64},
-    μ0_r::Vector{Float64},
-    V::Vector{Float64},
-    Y_r::Vector{Float64},
+    W::Matrix,
+    l0_r::Matrix,
+    μ0_r,
+    V::Vector,
+    Y_r,
     b0::Float64,
-    z_r::Vector{Float64},
-    p0::Vector{Float64},
-    Z::Matrix{Float64},
-    G::Matrix{Float64},
+    z_r::Vector,
+    p0::Vector,
+    Z::Matrix,
+    G::Matrix,
     D::Int,
     opt::Options,
     Λ_noise,
@@ -316,16 +314,16 @@ function compute_F_sparse(
     b_r::Float64,
     QF::Float64,
     τ_r::Float64,
-    l0_r::Matrix{Float64},
-    μ_r::Vector{Float64},
-    μ0_r::Vector{Float64},
-    Σ_r::Matrix{Float64},
+    l0_r::Matrix,
+    μ_r::Vector,
+    μ0_r,
+    Σ_r::Matrix,
     a0::Float64,
     b0::Float64,
     dim_r::Int,
-    z_r::Vector{Float64},
+    z_r::Vector,
     z_idx::BitVector,
-    p0::Vector{Float64},
+    p0::Vector,
     log_det_Λ_noise::Float64,
 )
 

@@ -217,12 +217,12 @@ function euler_make_indices(dcm::T) where {T<:DCM}
     # create index array
     Indices = collect(1:L)
 
-    # get the indices that coincide wiht the data timepoints
+    # get the indices that coincide with the data time points
     idx = Vector{Bool}(undef, L)
     idx .= false
     idx[delay:Int(floor(dcm.Y.dt / dcm.U.dt)):end] .= true
 
-    # asign those timings
+    # assign those timings
     return Indices[idx]
 end
 
@@ -290,14 +290,14 @@ function dcm_euler_integration_jl(
         # for each region
         for jState in 1:nStates
             # update x (neuronal signal)
-            x_out[iStep + 1, jState] =
+            @views x_out[iStep + 1, jState] =
                 x_out[iStep, jState] +
                 timeStep * (A[:, jState]' * x_out[iStep, :] + C[iStep, jState])
 
             if dcmTypeB
                 # B matrix update
                 for kIter in 1:nInputs
-                    x_out[iStep + 1, jState] +=
+                    @views x_out[iStep + 1, jState] +=
                         timeStep *
                         (U[iStep, kIter] * x_out[iStep, :]' * B[:, jState, kIter])
                 end
@@ -306,7 +306,7 @@ function dcm_euler_integration_jl(
             if dcmTypeD
                 # D matrix update
                 for kIter in 1:nStates
-                    x_out[iStep + 1, jState] +=
+                    @views x_out[iStep + 1, jState] +=
                         timeStep *
                         (x_out[iStep, kIter] * (x_out[iStep, :]' * D[:, jState, kIter]))
                 end

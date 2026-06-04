@@ -1,6 +1,4 @@
-function rigid_inversion(
-    rdcm::RigidRdcm, X::Matrix{Float64}, Y::Matrix{Float64}, opt::Options
-)
+function rigid_inversion(rdcm::RigidRdcm, X::Matrix, Y::Matrix, opt::Options)
     dcm = copy(rdcm) #TODO: maybe there is more elegant way where no copy is needed
     maxIter = opt.invParams.maxIter
     pr = opt.invParams.tol^2
@@ -39,20 +37,20 @@ function rigid_inversion(
 
     prog = Progress(nr; enabled=(!opt.testing))
     for r in 1:nr
-        idx_r = idx[r, :]
+        @views idx_r = idx[r, :]
 
         # remove unnecessary dimensions
-        Xᵣ = X[:, idx_r]
-        Yᵣ = Y[:, r]
+        @views Xᵣ = X[:, idx_r]
+        @views Yᵣ = Y[:, r]
 
         # effective dimensionality
         dim_r = sum(idx_r)
 
         # prior precision matrix
-        l0ᵣ = diagm(l0[r, idx_r])
+        @views l0ᵣ = diagm(l0[r, idx_r])
 
         # prior mean for connectivity
-        μ0ᵣ = μ0[r, idx_r]
+        @views μ0ᵣ = μ0[r, idx_r]
 
         # precompute X'X and X'Y
         W = Xᵣ' * Λ_noise * Xᵣ
@@ -121,16 +119,16 @@ function rigid_inversion(
 end
 
 function update_posterior_rigid!(
-    μᵣ::Vector{Float64},
-    Σᵣ::Matrix{Float64},
+    μᵣ::Vector,
+    Σᵣ::Matrix,
     a_r::Float64,
     τᵣ::Float64,
-    W::Matrix{Float64},
-    l0ᵣ::Matrix{Float64},
-    μ0ᵣ::Vector{Float64},
-    V::Vector{Float64},
-    Yᵣ::Vector{Float64},
-    Xᵣ::Matrix{Float64},
+    W::Matrix,
+    l0ᵣ,
+    μ0ᵣ,
+    V::Vector,
+    Yᵣ,
+    Xᵣ,
     β0::Float64,
     Λ_noise,
 )
@@ -156,10 +154,10 @@ function compute_F(
     βᵣ::Float64,
     QF::Float64,
     τᵣ::Float64,
-    l0ᵣ::Matrix{Float64},
-    μᵣ::Vector{Float64},
-    μ0ᵣ::Vector{Float64},
-    Σᵣ::Matrix{Float64},
+    l0ᵣ,
+    μᵣ::Vector,
+    μ0ᵣ,
+    Σᵣ::Matrix,
     a0::Float64,
     β0::Float64,
     dimᵣ::Int,

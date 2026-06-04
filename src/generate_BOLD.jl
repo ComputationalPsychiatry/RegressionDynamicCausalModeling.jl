@@ -90,10 +90,10 @@ end
 """
 $(SIGNATURES)
 
-Generate a hemodynamic response function (HRF) given a certain lenght N and sampling rate u_dt.
+Generate a hemodynamic response function (HRF) given a certain length N and sampling rate u_dt.
 
 # Arguments
-- `N::Int`: Lenght of HRF
+- `N::Int`: Length of HRF
 - `u_dt::Float64`: Repetition time
 
 # Output
