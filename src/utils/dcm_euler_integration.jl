@@ -1,5 +1,7 @@
 
-const LIB_DCM_EULER = abspath(joinpath(euler_integration_bin, "libdcm_euler_integration.so"))
+const LIB_DCM_EULER = abspath(
+    joinpath(euler_integration_bin, "libdcm_euler_integration.so")
+)
 
 """
     dcm_euler_gen(dcm)
