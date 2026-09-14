@@ -16,7 +16,10 @@ using SparseArrays: spzeros, sparse
     end
 
     @testset "Code linting" begin
-        JET.test_package(RegressionDynamicCausalModeling; target_defined_modules=true)
+        JET.test_package(
+            RegressionDynamicCausalModeling;
+            target_modules=(RegressionDynamicCausalModeling,),
+        )
     end
 
     @testset "Code quality" begin

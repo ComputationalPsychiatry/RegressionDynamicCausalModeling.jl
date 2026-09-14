@@ -1,4 +1,8 @@
 
+const LIB_DCM_EULER = abspath(
+    joinpath(euler_integration_bin, "libdcm_euler_integration.so")
+)
+
 """
     dcm_euler_gen(dcm)
 
@@ -185,7 +189,7 @@ function dcm_euler_integration_c(
     v1_out = Matrix{Cdouble}(undef, nTime, nStates)
     q1_out = Matrix{Cdouble}(undef, nTime, nStates)
 
-    @ccall abspath(joinpath(euler_integration_bin, "libdcm_euler_integration.so")).dcm_euler_integration(
+    @ccall LIB_DCM_EULER.dcm_euler_integration(
         A::Ref{Cdouble},
         C::Ref{Cdouble},
         U::Ref{Cdouble},
