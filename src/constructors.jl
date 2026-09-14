@@ -662,6 +662,7 @@ function RigidRdcm(dcm::LinearDCM)
 
     # U is nothing
     r_dt = 16 # assumes microtime resolution is 16
+    N = 0
     y = dcm.Y.y
     if !isnothing(y) # need to do this otherwise JET.jl gives a false positive (1/2 union split)
         N = size(y, 1) * r_dt
