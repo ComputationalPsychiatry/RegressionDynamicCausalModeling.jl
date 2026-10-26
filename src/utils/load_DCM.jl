@@ -123,7 +123,7 @@ function load_MAT_DCM(path::String; verbose=true, dcm_key="DCM")
     if haskey(DCM_mat, "Conf")
         try
             if haskey(DCM_mat["Conf"], "name")
-                Conf = Confound(DCM_mat["Conf"]["X0"], vec(DCM_mat["Conf"]["name"]))
+                Conf = Confound(DCM_mat["Conf"]["X0"], to_vec(DCM_mat["Conf"]["name"]))
             else
                 Conf = Confound(DCM_mat["Conf"]["X0"])
             end
@@ -338,6 +338,10 @@ function empty_field(k::Symbol)
         return Array{String}(undef, 0)
     end
 end
+
+# ensure compatibility with different MAT.jl versions
+to_vec(x::AbstractArray) = vec(x)
+to_vec(x) = [x]
 
 """
 $(SIGNATURES)
